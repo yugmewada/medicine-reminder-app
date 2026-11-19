@@ -1,72 +1,97 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_tokens.dart';
 
-/// App mark drawn in code, traced from the design screenshot.
+/// Doseza mark: a tilted two-tone capsule, drawn in code.
 ///
-/// Replace with the official vector asset once it is exported from Figma.
+/// Placeholder until an official vector logo exists; replace the painter
+/// with the exported asset when it does.
 class BrandLogo extends StatelessWidget {
-  const BrandLogo({super.key, this.size = AppSizes.logo, this.color});
+  const BrandLogo({
+    super.key,
+    this.size = AppSizes.logo,
+    this.color,
+    this.accent,
+  });
 
   final double size;
+
+  /// Main half. Defaults to `colorScheme.primary`.
   final Color? color;
+
+  /// Second half. Defaults to a lighter tint of [color].
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
+    final main = color ?? Theme.of(context).colorScheme.primary;
     return Semantics(
-      label: 'App logo',
+      label: context.l10n.logoLabel(context.l10n.appTitle),
       image: true,
       child: CustomPaint(
         size: Size.square(size),
-        painter: _BrandLogoPainter(
-          color ?? Theme.of(context).colorScheme.primary,
+        painter: _CapsulePainter(
+          main: main,
+          accent: accent ?? main.withValues(alpha: 0.45),
         ),
       ),
     );
   }
 }
 
-class _BrandLogoPainter extends CustomPainter {
-  const _BrandLogoPainter(this.color);
+class _CapsulePainter extends CustomPainter {
+  const _CapsulePainter({required this.main, required this.accent});
 
-  final Color color;
+  final Color main;
+  final Color accent;
 
   @override
   void paint(Canvas canvas, Size size) {
-    Path polygon(List<(double, double)> points) {
-      final path = Path()
-        ..moveTo(points.first.$1 * size.width, points.first.$2 * size.height);
-      for (final (x, y) in points.skip(1)) {
-        path.lineTo(x * size.width, y * size.height);
-      }
-      return path..close();
-    }
+    final s = size.width;
+    canvas
+      ..save()
+      ..translate(s / 2, s / 2)
+      ..rotate(-math.pi / 4);
 
-    final triangle = polygon([(0.5, 0.06), (0.955, 0.96), (0.045, 0.96)]);
-    final chevronCut = polygon([
-      (0.192, 0.819),
-      (0.492, 0.228),
-      (0.904, 1.05),
-      (0.703, 1.05),
-      (0.474, 0.461),
-      (0.218, 0.839),
-    ]);
-
-    canvas.saveLayer(Offset.zero & size, Paint());
-    canvas.drawPath(triangle, Paint()..color = color);
-    canvas.drawPath(
-      triangle,
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.08
-        ..strokeJoin = StrokeJoin.round,
+    final length = s * 0.92;
+    final width = s * 0.40;
+    final body = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset.zero, width: length, height: width),
+      Radius.circular(width / 2),
     );
-    canvas.drawPath(chevronCut, Paint()..blendMode = BlendMode.clear);
+
+    canvas.save();
+    canvas.clipRRect(body);
+    canvas.drawRect(
+      Rect.fromLTRB(-length / 2, -width / 2, 0, width / 2),
+      Paint()..color = main,
+    );
+    canvas.drawRect(
+      Rect.fromLTRB(0, -width / 2, length / 2, width / 2),
+      Paint()..color = accent,
+    );
+    canvas.restore();
+
+    // Highlight on the main half.
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          -length * 0.36,
+          -width * 0.26,
+          length * 0.22,
+          width * 0.14,
+        ),
+        Radius.circular(width * 0.07),
+      ),
+      Paint()..color = const Color(0x59FFFFFF),
+    );
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_BrandLogoPainter oldDelegate) =>
-      oldDelegate.color != color;
+  bool shouldRepaint(_CapsulePainter old) =>
+      old.main != main || old.accent != accent;
 }

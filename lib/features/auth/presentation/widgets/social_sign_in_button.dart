@@ -1,87 +1,62 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_tokens.dart';
+import '../../../../core/widgets/widgets.dart';
+import '../../../session/session_controller.dart';
 
-enum SocialProvider {
-  facebook('Facebook'),
-  google('Google'),
-  apple('Apple');
-
-  const SocialProvider(this.label);
-
-  final String label;
-}
-
-/// Circular "Continue with [provider]" button.
+/// Full-width "Continue with Google/Apple" button. In this prototype these
+/// are simulated entry points only: no OAuth, no credentials.
 class SocialSignInButton extends StatelessWidget {
   const SocialSignInButton({
     super.key,
-    required this.provider,
+    required this.method,
     required this.onPressed,
-  });
+  }) : assert(method != SignInMethod.guest);
 
-  final SocialProvider provider;
+  final SignInMethod method;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Semantics(
-      button: true,
-      label: 'Continue with ${provider.label}',
-      excludeSemantics: true,
-      child: Material(
-        // White on light; a raised tone on dark so the circle stays visible.
-        color: scheme.brightness == Brightness.light
-            ? scheme.surfaceContainerLowest
-            : scheme.surfaceContainerHighest,
-        shape: const CircleBorder(),
-        elevation: 3,
-        shadowColor: scheme.shadow.withValues(alpha: 0.35),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: ValueKey('social-${provider.name}'),
-          onTap: onPressed,
-          child: SizedBox.square(
-            dimension: AppSizes.socialButton,
-            child: Center(child: _ProviderMark(provider)),
-          ),
-        ),
-      ),
+    return AppButton.secondary(
+      key: ValueKey('social-${method.name}'),
+      label: context.l10n.continueWithProvider(method.brandName!),
+      icon: _ProviderMark(method),
+      expand: true,
+      onPressed: onPressed,
     );
   }
 }
 
 class _ProviderMark extends StatelessWidget {
-  const _ProviderMark(this.provider);
+  const _ProviderMark(this.method);
 
-  final SocialProvider provider;
+  final SignInMethod method;
 
   @override
   Widget build(BuildContext context) {
-    return switch (provider) {
-      SocialProvider.facebook => const Icon(
-        Icons.facebook,
-        size: AppSizes.socialIcon,
-        color: AppColors.facebookBlue,
-      ),
-      SocialProvider.apple => Icon(
-        Icons.apple,
-        size: AppSizes.socialIcon,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-      // Placeholder: swap for Google's official multicolor "G" asset
-      // (required by Google's sign-in branding guidelines).
-      SocialProvider.google => const Text(
-        'G',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: AppColors.googleBlue,
-          height: 1,
+    return ExcludeSemantics(
+      child: switch (method) {
+        SignInMethod.apple => Icon(
+          Icons.apple,
+          size: 22,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
-      ),
-    };
+        // Placeholder: swap for Google's official multicolor "G" asset
+        // (required by Google's sign-in branding guidelines) if real
+        // Google Sign-In is ever added.
+        // l10n-ignore: placeholder brand glyph, not translatable text.
+        _ => const Text(
+          'G',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.googleBlue,
+            height: 1,
+          ),
+        ),
+      },
+    );
   }
 }

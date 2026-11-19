@@ -1,0 +1,994 @@
+{
+  "@@locale": "en",
+  "appTitle": "Doseza",
+  "@appTitle": {
+    "description": "App name shown by the OS task switcher. Brand name: do not translate."
+  },
+  "actionClose": "Close",
+  "@actionClose": {
+    "description": "Button that closes an information dialog."
+  },
+  "actionCancel": "Cancel",
+  "@actionCancel": {
+    "description": "Button that cancels a dialog or form."
+  },
+  "actionDismiss": "Dismiss",
+  "@actionDismiss": {
+    "description": "Tooltip for the close (X) button on an in-app notification banner."
+  },
+  "actionUndo": "Undo",
+  "@actionUndo": {
+    "description": "Reverts the last dose log."
+  },
+  "loadingLabel": "{label}, loading",
+  "@loadingLabel": {
+    "description": "Screen-reader label for a button that is busy.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "Choose photo"
+      }
+    }
+  },
+  "logoLabel": "{appName} logo",
+  "@logoLabel": {
+    "description": "Screen-reader label for the app logo.",
+    "placeholders": {
+      "appName": {
+        "type": "String",
+        "example": "Doseza"
+      }
+    }
+  },
+  "longDate": "{date}",
+  "@longDate": {
+    "description": "A full date, e.g. Thursday, November 19.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMMEEEEd"
+      }
+    }
+  },
+  "percentValue": "{value}",
+  "@percentValue": {
+    "description": "A percentage, e.g. 20%. Value is a fraction (0.2).",
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  },
+  "splashTagline": "Your medicines, organised.",
+  "@splashTagline": {
+    "description": "Short tagline under the app name on the splash screen."
+  },
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": {
+    "description": "Skips the walkthrough."
+  },
+  "onboardingNext": "Next",
+  "@onboardingNext": {
+    "description": "Goes to the next walkthrough page."
+  },
+  "onboardingGetStarted": "Get started",
+  "@onboardingGetStarted": {
+    "description": "Finishes the walkthrough."
+  },
+  "onboardingPageLabel": "Page {current} of {total}",
+  "@onboardingPageLabel": {
+    "description": "Screen-reader label for the walkthrough page dots.",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingInventoryTitle": "All your medicines in one place",
+  "@onboardingInventoryTitle": {
+    "description": "Walkthrough page 1 headline."
+  },
+  "onboardingInventoryBody": "Keep a simple list of what you have, with an optional photo and how much is in stock.",
+  "@onboardingInventoryBody": {
+    "description": "Walkthrough page 1 body."
+  },
+  "onboardingPlanTitle": "See each day at a glance",
+  "@onboardingPlanTitle": {
+    "description": "Walkthrough page 2 headline."
+  },
+  "onboardingPlanBody": "Pick any day to see what is on your schedule, then log each dose as taken or skipped.",
+  "@onboardingPlanBody": {
+    "description": "Walkthrough page 2 body."
+  },
+  "onboardingProgressTitle": "Progress without pressure",
+  "@onboardingProgressTitle": {
+    "description": "Walkthrough page 3 headline."
+  },
+  "onboardingProgressBody": "A clear daily summary of what you have logged. No streaks, no judgement — just your own record.",
+  "@onboardingProgressBody": {
+    "description": "Walkthrough page 3 body. Supportive tone; avoid blame."
+  },
+  "welcomeTitle": "Welcome!",
+  "@welcomeTitle": {
+    "description": "Welcome screen headline."
+  },
+  "welcomeSubtitle": "Keep track of your medicines and log each day, at your own pace.",
+  "@welcomeSubtitle": {
+    "description": "Welcome screen supporting text."
+  },
+  "continueWithProvider": "Continue with {provider}",
+  "@continueWithProvider": {
+    "description": "Demo sign-in button. Provider is a brand name.",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "welcomeOr": "or",
+  "@welcomeOr": {
+    "description": "Divider between social sign-in and the demo button."
+  },
+  "continueAsGuest": "Continue as guest",
+  "@continueAsGuest": {
+    "description": "Enters the app as a guest (view and log doses; cannot change medicines)."
+  },
+  "guestLimitsNote": "As a guest you can view medicines and log doses. Sign in to add, edit or delete them.",
+  "@guestLimitsNote": {
+    "description": "Welcome-screen note explaining guest restrictions."
+  },
+  "welcomeSimulatedNote": "Sign-in is simulated in this prototype. No account is created and no credentials are collected.",
+  "@welcomeSimulatedNote": {
+    "description": "Footnote explaining sign-in is not real."
+  },
+  "demoSignInTitle": "Demo sign-in",
+  "@demoSignInTitle": {
+    "description": "Title of the dialog shown before simulated sign-in."
+  },
+  "demoSignInMessage": "{provider} sign-in is simulated in this prototype. No {provider} account is used, nothing is sent, and no account is created. You will continue with a fictional demo profile.",
+  "@demoSignInMessage": {
+    "description": "Explains that social sign-in is simulated.",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "demoSignInConfirm": "Continue to demo",
+  "@demoSignInConfirm": {
+    "description": "Confirms entering the demo."
+  },
+  "navToday": "Today",
+  "@navToday": {
+    "description": "Bottom navigation: daily plan tab."
+  },
+  "navInventory": "Inventory",
+  "@navInventory": {
+    "description": "Bottom navigation: medicine list tab."
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom navigation: profile tab."
+  },
+  "greeting": "{period, select, morning{Good morning, {name}} afternoon{Good afternoon, {name}} other{Good evening, {name}}}",
+  "@greeting": {
+    "description": "Home greeting by time of day.",
+    "placeholders": {
+      "period": {
+        "type": "String",
+        "example": "morning"
+      },
+      "name": {
+        "type": "String",
+        "example": "Jordan"
+      }
+    }
+  },
+  "greetingGuest": "{period, select, morning{Good morning} afternoon{Good afternoon} other{Good evening}}",
+  "@greetingGuest": {
+    "description": "Home greeting for a guest (no name).",
+    "placeholders": {
+      "period": {
+        "type": "String",
+        "example": "morning"
+      }
+    }
+  },
+  "todayWithDate": "Today · {date}",
+  "@todayWithDate": {
+    "description": "Subtitle when today is selected.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMMEEEEd"
+      }
+    }
+  },
+  "jumpToToday": "Today",
+  "@jumpToToday": {
+    "description": "Button that selects today in the date strip."
+  },
+  "dayCellLabel": "{date}",
+  "@dayCellLabel": {
+    "description": "Screen-reader label for a day in the date strip.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMMEEEEd"
+      }
+    }
+  },
+  "dayCellTodayLabel": "{date}, today",
+  "@dayCellTodayLabel": {
+    "description": "Screen-reader label for today's cell in the date strip.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMMEEEEd"
+      }
+    }
+  },
+  "todayPlanTitle": "Today's plan",
+  "@todayPlanTitle": {
+    "description": "Section heading for today's doses."
+  },
+  "planForDate": "Plan for {date}",
+  "@planForDate": {
+    "description": "Section heading for another day's doses.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMd"
+      }
+    }
+  },
+  "doseCount": "{count, plural, =1{1 dose} other{{count} doses}}",
+  "@doseCount": {
+    "description": "Number of scheduled doses.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressHeadline": "{taken} of {total} scheduled {total, plural, =1{dose} other{doses}} logged as taken — {percent}",
+  "@progressHeadline": {
+    "description": "Daily progress summary. Percent is a fraction formatted as a percentage.",
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "double",
+        "format": "percentPattern"
+      }
+    }
+  },
+  "progressNone": "No doses scheduled for this day",
+  "@progressNone": {
+    "description": "Progress card when nothing is scheduled."
+  },
+  "progressNoValue": "–",
+  "@progressNoValue": {
+    "description": "Shown in the progress ring when nothing is scheduled."
+  },
+  "progressSkipped": "{count, plural, other{{count} skipped}}",
+  "@progressSkipped": {
+    "description": "Count of skipped doses.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressNotLogged": "{count, plural, other{{count} not logged yet}}",
+  "@progressNotLogged": {
+    "description": "Count of doses without a log.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressAllLogged": "Everything is logged",
+  "@progressAllLogged": {
+    "description": "Shown when every dose has a log."
+  },
+  "timeListSeparator": ", ",
+  "@timeListSeparator": {
+    "description": "Separator between times in a list, e.g. 8:00 AM, 8:00 PM."
+  },
+  "listSeparator": " · ",
+  "@listSeparator": {
+    "description": "Separator between short facts on one line."
+  },
+  "progressCaption": "Based on what you log in this demo. It does not confirm a medicine was taken.",
+  "@progressCaption": {
+    "description": "Clarifies progress reflects user logs, not verified intake."
+  },
+  "emptyPlanTitle": "Nothing scheduled",
+  "@emptyPlanTitle": {
+    "description": "Empty state title for a day with no doses."
+  },
+  "emptyPlanMessage": "There are no doses on your demo schedule for {date}.",
+  "@emptyPlanMessage": {
+    "description": "Empty state message; date is a weekday name.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "EEEE"
+      }
+    }
+  },
+  "todayNotice": "Prototype with fictional sample data. Logs stay in memory for this session. This app does not give medical advice; follow the directions from your pharmacist or prescriber.",
+  "@todayNotice": {
+    "description": "Prototype disclaimer at the bottom of Home."
+  },
+  "doseStatus": "{status, select, taken{Taken} skipped{Skipped} upcoming{Upcoming} scheduled{Scheduled} other{Not logged}}",
+  "@doseStatus": {
+    "description": "Status chip on a dose card. Avoid wording that blames the user.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "taken"
+      }
+    }
+  },
+  "doseTimeAndType": "{time} · {type}",
+  "@doseTimeAndType": {
+    "description": "Dose card subtitle: time and medicine type.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:00 AM"
+      },
+      "type": {
+        "type": "String",
+        "example": "Tablet"
+      }
+    }
+  },
+  "actionTaken": "Taken",
+  "@actionTaken": {
+    "description": "Logs a dose as taken."
+  },
+  "actionSkip": "Skip",
+  "@actionSkip": {
+    "description": "Logs a dose as skipped."
+  },
+  "doseTakenHint": "Logs {time} {medicine} as taken",
+  "@doseTakenHint": {
+    "description": "Screen-reader hint for the Taken button.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseSkipHint": "Logs {time} {medicine} as skipped",
+  "@doseSkipHint": {
+    "description": "Screen-reader hint for the Skip button.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseFutureNote": "You can log this dose on the day.",
+  "@doseFutureNote": {
+    "description": "Shown instead of log buttons on future days."
+  },
+  "doseLogged": "{status, select, taken{{medicine} ({time}) logged as taken.} other{{medicine} ({time}) logged as skipped.}}",
+  "@doseLogged": {
+    "description": "Confirmation after logging a dose.",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "taken"
+      },
+      "medicine": {
+        "type": "String",
+        "example": "Brevora"
+      },
+      "time": {
+        "type": "String",
+        "example": "8:00 AM"
+      }
+    }
+  },
+  "medicineType": "{type, select, tablet{Tablet} capsule{Capsule} liquid{Liquid} other{Other}}",
+  "@medicineType": {
+    "description": "Form of a medicine.",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "tablet"
+      }
+    }
+  },
+  "frequencyName": "{frequency, select, daily{Daily} weekly{Weekly} other{Monthly}}",
+  "@frequencyName": {
+    "description": "How often a medicine appears on the schedule (not course length).",
+    "placeholders": {
+      "frequency": {
+        "type": "String",
+        "example": "daily"
+      }
+    }
+  },
+  "cadenceDaily": "Every day",
+  "@cadenceDaily": {
+    "description": "Schedule summary for a daily medicine."
+  },
+  "cadenceWeekly": "Every {weekday}",
+  "@cadenceWeekly": {
+    "description": "Schedule summary for a weekly medicine.",
+    "placeholders": {
+      "weekday": {
+        "type": "DateTime",
+        "format": "EEEE"
+      }
+    }
+  },
+  "cadenceMonthly": "Monthly on day {day}",
+  "@cadenceMonthly": {
+    "description": "Schedule summary for a monthly medicine.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "stockUnitName": "{unit, select, tablets{tablets} capsules{capsules} millilitres{mL} other{units}}",
+  "@stockUnitName": {
+    "description": "Inventory unit name on a choice chip.",
+    "placeholders": {
+      "unit": {
+        "type": "String",
+        "example": "tablets"
+      }
+    }
+  },
+  "stockAmount": "{unit, select, tablets{{count, plural, =1{1 tablet} other{{count} tablets}}} capsules{{count, plural, =1{1 capsule} other{{count} capsules}}} millilitres{{count} mL} other{{count, plural, =1{1 unit} other{{count} units}}}}",
+  "@stockAmount": {
+    "description": "Inventory amount with unit. This is stock on hand, never a dose.",
+    "placeholders": {
+      "unit": {
+        "type": "String",
+        "example": "tablets"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inStock": "{amount} in stock",
+  "@inStock": {
+    "description": "Stock line on a medicine card.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "42 tablets"
+      }
+    }
+  },
+  "typeAndCadence": "{type} · {cadence}",
+  "@typeAndCadence": {
+    "description": "Medicine card subtitle.",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "cadence": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryTitle": "Inventory",
+  "@inventoryTitle": {
+    "description": "Inventory screen title."
+  },
+  "medicineCount": "{count, plural, =1{1 medicine} other{{count} medicines}}",
+  "@medicineCount": {
+    "description": "Number of medicines in the inventory.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryNotice": "Sample medicines with fictional names. Changes last for this session only and reset when you log out or restart the app.",
+  "@inventoryNotice": {
+    "description": "Prototype notice on the inventory."
+  },
+  "inventorySwipeHint": "Tip: swipe a medicine left to edit or delete it.",
+  "@inventorySwipeHint": {
+    "description": "Hint above the inventory list. 'left' means toward the start edge in left-to-right languages; adapt for right-to-left."
+  },
+  "emptyInventoryTitle": "No medicines yet",
+  "@emptyInventoryTitle": {
+    "description": "Empty inventory title."
+  },
+  "emptyInventoryMessage": "Add a medicine to keep track of your stock and see it on your daily plan.",
+  "@emptyInventoryMessage": {
+    "description": "Empty inventory message."
+  },
+  "addMedicine": "Add medicine",
+  "@addMedicine": {
+    "description": "Opens the add-medicine form; also the form title and submit button."
+  },
+  "medicineFallbackTitle": "Medicine",
+  "@medicineFallbackTitle": {
+    "description": "Title when a medicine cannot be found."
+  },
+  "medicineNotFoundTitle": "Medicine not found",
+  "@medicineNotFoundTitle": {
+    "description": "Shown when a medicine id does not exist."
+  },
+  "medicineNotFoundMessage": "It may have been reset with the demo session.",
+  "@medicineNotFoundMessage": {
+    "description": "Explains a missing medicine."
+  },
+  "backToInventory": "Back to inventory",
+  "@backToInventory": {
+    "description": "Returns to the inventory list."
+  },
+  "editMedicine": "Edit medicine",
+  "@editMedicine": {
+    "description": "Opens the edit form; also the edit form title."
+  },
+  "deleteMedicine": "Delete medicine",
+  "@deleteMedicine": {
+    "description": "Deletes the medicine (toolbar tooltip and button on the detail screen)."
+  },
+  "deleteMedicineTitle": "Delete {name}?",
+  "@deleteMedicineTitle": {
+    "description": "Confirmation dialog title before deleting a medicine.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Brevora"
+      }
+    }
+  },
+  "deleteMedicineMessage": "It will be removed from your inventory and daily plan for this session.",
+  "@deleteMedicineMessage": {
+    "description": "Confirmation dialog message before deleting a medicine."
+  },
+  "deleteConfirm": "Delete",
+  "@deleteConfirm": {
+    "description": "Confirms deleting; also the swipe action label."
+  },
+  "medicineDeleted": "{name} deleted.",
+  "@medicineDeleted": {
+    "description": "Snackbar after deleting a medicine; offers Undo.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Brevora"
+      }
+    }
+  },
+  "actionEdit": "Edit",
+  "@actionEdit": {
+    "description": "Swipe action that opens the edit form."
+  },
+  "labelFrequency": "Frequency",
+  "@labelFrequency": {
+    "description": "Label for how often a medicine is scheduled."
+  },
+  "labelScheduleTimes": "Schedule times (demo)",
+  "@labelScheduleTimes": {
+    "description": "Label for demo schedule times."
+  },
+  "labelInStock": "In stock",
+  "@labelInStock": {
+    "description": "Label for the stock amount."
+  },
+  "frequencyWithCadence": "{frequency} · {cadence}",
+  "@frequencyWithCadence": {
+    "description": "Frequency and its schedule summary.",
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "cadence": {
+        "type": "String"
+      }
+    }
+  },
+  "detailNotice": "Schedule times are entries for this demo, not dosing instructions. Follow the directions from your pharmacist or prescriber.",
+  "@detailNotice": {
+    "description": "Disclaimer on the medicine detail screen."
+  },
+  "photoTitle": "Photo (optional)",
+  "@photoTitle": {
+    "description": "Photo field label."
+  },
+  "photoHelp": "Chosen with your system photo picker. Kept in memory for this session only.",
+  "@photoHelp": {
+    "description": "Explains how photos are picked and kept."
+  },
+  "photoChoose": "Choose photo",
+  "@photoChoose": {
+    "description": "Opens the photo picker."
+  },
+  "photoChange": "Change",
+  "@photoChange": {
+    "description": "Picks a different photo."
+  },
+  "photoRemove": "Remove",
+  "@photoRemove": {
+    "description": "Removes the chosen photo."
+  },
+  "photoAddLabel": "Add a photo",
+  "@photoAddLabel": {
+    "description": "Screen-reader label for the empty photo box."
+  },
+  "photoChangeLabel": "Change photo",
+  "@photoChangeLabel": {
+    "description": "Screen-reader label for the photo preview."
+  },
+  "pickFailed": "{reason, select, accessDenied{Photo access is turned off for this app.} invalidImage{That file is not a supported image.} alreadyActive{The photo picker is already open.} other{The photo could not be loaded.}}",
+  "@pickFailed": {
+    "description": "Error when picking a photo fails.",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "accessDenied"
+      }
+    }
+  },
+  "fieldName": "Medicine name",
+  "@fieldName": {
+    "description": "Name field label."
+  },
+  "fieldType": "Type",
+  "@fieldType": {
+    "description": "Medicine type field label."
+  },
+  "fieldFrequencyHelp": "How often it appears on your schedule.",
+  "@fieldFrequencyHelp": {
+    "description": "Explains frequency is cadence, not course duration."
+  },
+  "fieldWeekday": "Day of the week",
+  "@fieldWeekday": {
+    "description": "Weekday choice for weekly medicines."
+  },
+  "fieldDayOfMonth": "Day of the month",
+  "@fieldDayOfMonth": {
+    "description": "Day choice for monthly medicines."
+  },
+  "fieldDayOfMonthHelp": "Days 1–28, so every month includes it.",
+  "@fieldDayOfMonthHelp": {
+    "description": "Explains why days stop at 28."
+  },
+  "dayOfMonthOption": "Day {day}",
+  "@dayOfMonthOption": {
+    "description": "One option in the day-of-month list.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleTimesHelp": "Times you choose to see this medicine on your daily plan. Not dosing advice.",
+  "@scheduleTimesHelp": {
+    "description": "Explains demo schedule times."
+  },
+  "addTime": "Add time",
+  "@addTime": {
+    "description": "Adds a schedule time."
+  },
+  "removeTime": "Remove {time}",
+  "@removeTime": {
+    "description": "Tooltip to remove a schedule time.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:00 AM"
+      }
+    }
+  },
+  "maxTimes": "Up to {count} times",
+  "@maxTimes": {
+    "description": "Shown when the time limit is reached.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timePickerHelp": "Select a schedule time",
+  "@timePickerHelp": {
+    "description": "Time picker heading."
+  },
+  "timeAlreadyAdded": "{time} is already on the list.",
+  "@timeAlreadyAdded": {
+    "description": "Warning when adding a duplicate time.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:00 AM"
+      }
+    }
+  },
+  "fieldQuantity": "Quantity in stock",
+  "@fieldQuantity": {
+    "description": "Stock quantity field label."
+  },
+  "fieldQuantityHelp": "How many you have on hand. This is not a dose.",
+  "@fieldQuantityHelp": {
+    "description": "Clarifies stock is not a dose."
+  },
+  "fieldUnit": "Stock unit",
+  "@fieldUnit": {
+    "description": "Unit choice for stock."
+  },
+  "formSessionNote": "Saved in memory for this session only. Nothing is written to the device or sent anywhere.",
+  "@formSessionNote": {
+    "description": "Explains session-only saving."
+  },
+  "saveChanges": "Save changes",
+  "@saveChanges": {
+    "description": "Submit button on the edit form."
+  },
+  "medicineFormIssue": "{issue, select, nameMissing{Please enter a medicine name.} nameTooLong{Please use {maxName} characters or fewer for the name.} timesMissing{Please add at least one schedule time.} quantityMissing{Please enter the quantity in stock.} quantityNotWhole{Please enter the quantity as a whole number.} other{Please enter a quantity from {minQuantity} to {maxQuantity}.}}",
+  "@medicineFormIssue": {
+    "description": "Snackbar shown when saving the medicine form fails validation. One message per problem; fields never show inline errors.",
+    "placeholders": {
+      "issue": {
+        "type": "String",
+        "example": "nameMissing"
+      },
+      "maxName": {
+        "type": "int"
+      },
+      "minQuantity": {
+        "type": "int"
+      },
+      "maxQuantity": {
+        "type": "int"
+      }
+    }
+  },
+  "medicineAdded": "{name} added for this session.",
+  "@medicineAdded": {
+    "description": "Confirmation after adding.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "medicineUpdated": "{name} updated for this session.",
+  "@medicineUpdated": {
+    "description": "Confirmation after editing.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "discardTitle": "Discard changes?",
+  "@discardTitle": {
+    "description": "Dialog title when leaving a changed form."
+  },
+  "discardMessage": "Your changes to this medicine will not be saved.",
+  "@discardMessage": {
+    "description": "Dialog message when leaving a changed form."
+  },
+  "discardConfirm": "Discard",
+  "@discardConfirm": {
+    "description": "Confirms discarding changes."
+  },
+  "keepEditing": "Keep editing",
+  "@keepEditing": {
+    "description": "Returns to the form."
+  },
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "Profile screen title."
+  },
+  "aboutSection": "About",
+  "@aboutSection": {
+    "description": "Profile section heading."
+  },
+  "termsTitle": "Terms and Conditions",
+  "@termsTitle": {
+    "description": "Profile row and dialog title."
+  },
+  "termsSubtitle": "Placeholder",
+  "@termsSubtitle": {
+    "description": "Indicates the terms are a placeholder."
+  },
+  "termsMessage": "This prototype has no terms and conditions. Real terms would be written and reviewed before any public release.",
+  "@termsMessage": {
+    "description": "Placeholder terms dialog."
+  },
+  "privacyTitle": "Privacy Policy",
+  "@privacyTitle": {
+    "description": "Profile row and dialog title."
+  },
+  "privacySubtitle": "How this prototype handles data",
+  "@privacySubtitle": {
+    "description": "Privacy row subtitle."
+  },
+  "privacyMessage": "This prototype has no published privacy policy.\n\nIt has no backend, account system or analytics. Sample data and your changes are kept in memory on this device and reset when you log out or close the app.",
+  "@privacyMessage": {
+    "description": "Honest data statement. Do not add claims about encryption or compliance."
+  },
+  "shareTitle": "Share App",
+  "@shareTitle": {
+    "description": "Profile row and dialog title."
+  },
+  "shareSubtitle": "Demo only",
+  "@shareSubtitle": {
+    "description": "Share row subtitle."
+  },
+  "shareMessage": "Sharing is not available in this prototype, and there is no store listing to share yet.",
+  "@shareMessage": {
+    "description": "Mock share dialog."
+  },
+  "licensesTitle": "Open-source licenses",
+  "@licensesTitle": {
+    "description": "Opens the license page."
+  },
+  "logoutTitle": "Log out",
+  "@logoutTitle": {
+    "description": "Logout row and confirm button."
+  },
+  "logoutSubtitle": "Resets this demo session",
+  "@logoutSubtitle": {
+    "description": "Logout row subtitle."
+  },
+  "logoutConfirmTitle": "Log out of the demo?",
+  "@logoutConfirmTitle": {
+    "description": "Logout confirmation title."
+  },
+  "logoutConfirmMessage": "You will return to the welcome screen. Medicines and dose logs you changed in this session will be reset to the sample data.",
+  "@logoutConfirmMessage": {
+    "description": "Logout confirmation message."
+  },
+  "loggedOut": "Logged out. Demo changes were cleared.",
+  "@loggedOut": {
+    "description": "Confirmation after logout."
+  },
+  "versionLine": "{appName} {version} · Prototype",
+  "@versionLine": {
+    "description": "App version footer.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String",
+        "example": "1.0.0 (build 1)"
+      }
+    }
+  },
+  "versionWithBuild": "{version} (build {build})",
+  "@versionWithBuild": {
+    "description": "Version and build number.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "avatarLabel": "Profile picture for {name}",
+  "@avatarLabel": {
+    "description": "Screen-reader label for the avatar.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guestName": "Guest",
+  "@guestName": {
+    "description": "Profile name shown for a guest."
+  },
+  "guestSubtitle": "Browsing as a guest",
+  "@guestSubtitle": {
+    "description": "Profile subtitle for a guest (instead of an email)."
+  },
+  "guestModeChip": "Guest mode",
+  "@guestModeChip": {
+    "description": "Chip on the profile marking guest mode."
+  },
+  "guestAvatarLabel": "Guest profile picture",
+  "@guestAvatarLabel": {
+    "description": "Screen-reader label for the guest avatar."
+  },
+  "signIn": "Sign in",
+  "@signIn": {
+    "description": "Opens the (simulated) sign-in prompt."
+  },
+  "signInPromptTitle": "Sign in to manage medicines",
+  "@signInPromptTitle": {
+    "description": "Title of the sign-in prompt shown to guests."
+  },
+  "signInPromptMessage": "Guests can view medicines and log doses. Sign in to add, edit or delete medicines.",
+  "@signInPromptMessage": {
+    "description": "Explains guest restrictions in the sign-in prompt."
+  },
+  "notNow": "Not now",
+  "@notNow": {
+    "description": "Closes the sign-in prompt."
+  },
+  "signedInUpgrade": "Signed in with {provider} (simulated). You can now manage medicines.",
+  "@signedInUpgrade": {
+    "description": "Snackbar after a guest signs in.",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "inventoryGuestBanner": "You're browsing as a guest. Sign in to add, edit or delete medicines.",
+  "@inventoryGuestBanner": {
+    "description": "Banner on the inventory for guests."
+  },
+  "exitGuestTitle": "Exit guest mode",
+  "@exitGuestTitle": {
+    "description": "Profile row for guests (instead of Log out)."
+  },
+  "exitGuestSubtitle": "Returns to the welcome screen",
+  "@exitGuestSubtitle": {
+    "description": "Subtitle of the exit-guest row."
+  },
+  "exitGuestConfirmTitle": "Exit guest mode?",
+  "@exitGuestConfirmTitle": {
+    "description": "Confirmation title when a guest exits."
+  },
+  "exitGuestConfirmMessage": "You will return to the welcome screen. Doses you logged in this session will be reset.",
+  "@exitGuestConfirmMessage": {
+    "description": "Confirmation message when a guest exits."
+  },
+  "exitedGuestMode": "Exited guest mode. Session changes were cleared.",
+  "@exitedGuestMode": {
+    "description": "Snackbar after a guest exits."
+  },
+  "demoProfileSimulated": "Demo profile · {provider} sign-in simulated",
+  "@demoProfileSimulated": {
+    "description": "Chip when entered via simulated social sign-in.",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
+  "notFoundTitle": "Page not found",
+  "@notFoundTitle": {
+    "description": "Title for an unknown link."
+  },
+  "notFoundMessage": "This link doesn't match anything in the app.",
+  "@notFoundMessage": {
+    "description": "Message for an unknown link."
+  },
+  "goToToday": "Go to Today",
+  "@goToToday": {
+    "description": "Navigates to the home tab."
+  }
+}

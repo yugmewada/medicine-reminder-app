@@ -1,64 +1,121 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/l10n/l10n.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/brand_colors.dart';
-import '../../../core/widgets/brand_logo.dart';
+import '../../../core/widgets/widgets.dart';
+import '../../session/session_controller.dart';
 import 'widgets/social_sign_in_button.dart';
-import 'widgets/welcome_hero.dart';
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({
-    super.key,
-    required this.onCreateAccount,
-    required this.onSignIn,
-    required this.onSocialSignIn,
-    this.heroImage,
-  });
-
-  final VoidCallback onCreateAccount;
-  final VoidCallback onSignIn;
-  final ValueChanged<SocialProvider> onSocialSignIn;
-
-  /// Hero photo, e.g. `AssetImage('assets/images/welcome_hero.jpg')`.
-  /// A branded placeholder is shown when null.
-  final ImageProvider? heroImage;
+/// Entry. Google and Apple are simulated sign-ins: tapping one explains
+/// that, then enters with a fictional profile and full access. "Continue as
+/// guest" enters with guest restrictions (no adding/editing/deleting
+/// medicines). Nothing is authenticated.
+@RoutePage()
+class WelcomeScreen extends ConsumerWidget {
+  const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.read(sessionProvider.notifier);
+    final l10n = context.l10n;
+
+    Future<void> simulated(SignInMethod method) async {
+      final proceed = await AppDialogs.confirm(
+        context,
+        icon: Icons.science_outlined,
+        title: l10n.demoSignInTitle,
+        message: l10n.demoSignInMessage(method.brandName!),
+        confirmLabel: l10n.demoSignInConfirm,
+      );
+      if (proceed) session.signIn(method);
+    }
+
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Fills the screen on normal sizes; scrolls on short screens or
-            // with large text instead of overflowing.
+            final artHeight = (constraints.maxHeight * 0.34).clamp(
+              150.0,
+              300.0,
+            );
             return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.xxl),
-                      const _Header(),
-                      const SizedBox(height: AppSpacing.xl),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                          ),
-                          child: WelcomeHero(
-                            image: heroImage,
-                            child: _AuthActions(
-                              onCreateAccount: onCreateAccount,
-                              onSignIn: onSignIn,
-                            ),
-                          ),
-                        ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.page,
+                vertical: AppSpacing.xl,
+              ),
+              child: ContentWidth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const BrandLogo(size: 32),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(l10n.appTitle, style: context.text.titleLarge),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    SizedBox(
+                      height: artHeight,
+                      child: const FeatureArt(kind: FeatureArtKind.welcome),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.welcomeTitle,
+                        textAlign: TextAlign.center,
+                        style: context.text.headlineMedium,
                       ),
-                      const SizedBox(height: AppSpacing.xl),
-                      _SocialSignIn(onSelected: onSocialSignIn),
-                      const SizedBox(height: AppSpacing.xl),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      l10n.welcomeSubtitle,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodyLarge?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    SocialSignInButton(
+                      method: SignInMethod.google,
+                      onPressed: () => simulated(SignInMethod.google),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SocialSignInButton(
+                      method: SignInMethod.apple,
+                      onPressed: () => simulated(SignInMethod.apple),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    const _OrDivider(),
+                    const SizedBox(height: AppSpacing.md),
+                    AppButton(
+                      key: const ValueKey('continue-guest'),
+                      label: l10n.continueAsGuest,
+                      expand: true,
+                      onPressed: () => session.signIn(SignInMethod.guest),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      l10n.guestLimitsNote,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.welcomeSimulatedNote,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -69,122 +126,25 @@ class WelcomeScreen extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header();
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Column(
-        children: [
-          const BrandLogo(),
-          const SizedBox(height: AppSpacing.xl),
-          Semantics(
-            header: true,
-            child: Text(
-              'Welcome!',
-              style: textTheme.headlineMedium,
-              textAlign: TextAlign.center,
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Text(
+            context.l10n.welcomeOr,
+            style: context.text.bodySmall?.copyWith(
+              color: context.colors.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          // Narrows the subtitle to wrap like the design. Padding (unlike
-          // ConstrainedBox) is respected by the IntrinsicHeight pass above.
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-            child: Text(
-              "Welcome Back! Let's make it better for your style",
-              style: textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AuthActions extends StatelessWidget {
-  const _AuthActions({required this.onCreateAccount, required this.onSignIn});
-
-  final VoidCallback onCreateAccount;
-  final VoidCallback onSignIn;
-
-  @override
-  Widget build(BuildContext context) {
-    final brand = BrandColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FilledButton(
-            key: const ValueKey('create-account'),
-            onPressed: onCreateAccount,
-            style: FilledButton.styleFrom(
-              backgroundColor: brand.accent,
-              foregroundColor: brand.onAccent,
-            ),
-            child: const Text('Create Account'),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FilledButton(
-            key: const ValueKey('sign-in'),
-            onPressed: onSignIn,
-            child: const Text('Sign In'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SocialSignIn extends StatelessWidget {
-  const _SocialSignIn({required this.onSelected});
-
-  final ValueChanged<SocialProvider> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-      child: Column(
-        children: [
-          Text(
-            'Continue with social media',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: BrandColors.of(context).mutedInk,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: AppSpacing.xl,
-            runSpacing: AppSpacing.lg,
-            children: [
-              SocialSignInButton(
-                provider: SocialProvider.facebook,
-                onPressed: () => onSelected(SocialProvider.facebook),
-              ),
-              SocialSignInButton(
-                provider: SocialProvider.google,
-                onPressed: () => onSelected(SocialProvider.google),
-              ),
-
-              if (isIOS)
-                SocialSignInButton(
-                  provider: SocialProvider.apple,
-                  onPressed: () => onSelected(SocialProvider.apple),
-                ),
-            ],
-          ),
-        ],
-      ),
+        ),
+        const Expanded(child: Divider()),
+      ],
     );
   }
 }

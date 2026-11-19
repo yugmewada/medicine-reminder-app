@@ -12,6 +12,10 @@ analyzer:
     - build/**
     - android/**
     - ios/**
+    # Generated code (never hand-edit; regenerate instead).
+    - lib/l10n/app_localizations*.dart
+    - "**/*.freezed.dart"
+    - "**/*.gr.dart"
 include: package:flutter_lints/flutter.yaml
 
 linter:

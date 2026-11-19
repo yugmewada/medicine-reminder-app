@@ -1,35 +1,42 @@
-# flutter-arc
+# Doseza
 
-A Flutter app for Android and iOS, built feature-first on a token-based Material 3 design system. It currently ships the **Welcome screen** of the authentication flow, with light and dark themes.
+A Flutter **medicine tracker prototype** for Android and iOS: splash, onboarding, demo sign-in, a daily dose plan with progress, an inventory with add/edit, and a profile.
+
+> **Prototype only.** All data is fictional sample data, kept in memory for the current session. Nothing is saved to disk or sent anywhere. Sign-in with Google or Apple is simulated, with no account and no credentials. The app gives no medical advice.
+
+**Contributors and AI agents: read [docs/MASTER_PROMPT.md](docs/MASTER_PROMPT.md) first.** It is the single source of truth for scope, design system, architecture and conventions.
 
 ## Features
 
-- **Welcome screen**: brand logo, headline, a hero section with *Create Account* and *Sign In* actions, and social sign-in buttons.
-- **Platform-aware social sign-in**: Facebook and Google on every platform; Apple appears on iOS only.
-- **Light and dark themes** built from one brand palette, with custom brand roles in a `ThemeExtension`.
-- **Responsive layout**: the screen fills the display on normal sizes and scrolls on short screens or with large text instead of overflowing.
-- **Accessibility**: semantic labels on the logo and social buttons, a header role on the title, and minimum touch targets.
-- **Bundled fonts**: Playfair Display (headlines) and Outfit (body). Their SIL OFL licenses are registered in the in-app license page.
-
-> **Status:** the sign-up, sign-in and social auth flows are not built yet. Tapping those actions shows a "not available yet" snackbar.
+- **Splash → onboarding (3 pages, skippable) → welcome.** Google and Apple entry points explain that sign-in is simulated and give full access.
+- **Guest mode:** "Continue as guest" lets people view medicines and log doses. Adding, editing or deleting medicines asks them to sign in (simulated), which keeps their session data and unlocks everything.
+- **Today:** a greeting with the first name, a scrollable date strip (today ±14 days), and a progress ring showing *"1 of 5 scheduled doses logged as taken — 20%"*. Each dose card has Taken / Skip / Undo, with an Undo action in the top snackbar too. There is an empty state for days with nothing scheduled, and future days cannot be logged.
+- **Inventory:** sample medicines with stock in explicit units, a detail view, and an add/edit form. The form covers name, type, frequency (daily / weekly / monthly), demo schedule times, quantity plus unit, and an optional photo. It validates input and asks before discarding changes.
+- **Profile:** demo profile, plus honest placeholder dialogs for Terms, Privacy and Share. It also has open-source licenses, the app version, and a Log out action that resets every session change.
+- **Top snackbar:** slides in from the top, and can be closed with ✕, swiped up, or left to time out.
+- **Light mode only**, by design.
+- **Accessibility and responsiveness:** WCAG AA contrast, 48 dp tap targets, semantic labels, support for 200% text, small and large phones, landscape, RTL layout, and reduced motion.
+- **Fully localized:** every string, including accessibility labels and errors, comes from ARB files with ICU plurals and selects. English ships now.
+- **auto_route navigation:** generated typed routes, a session guard, persistent tabs with their own stacks, deep links (remembered across sign-in), and a not-found fallback.
 
 ## Requirements
 
 | Tool | Version |
 | --- | --- |
-| Flutter | 3.50.0 or newer |
-| Dart | 3.13.0 or newer (bundled with Flutter) |
-| Android | Android Studio or SDK with a device/emulator |
-| iOS | Xcode on macOS (for iOS builds) |
+| Flutter | **3.50.0** (Dart 3.14). On the dev machine it is at `/opt/flutter`; the snap Flutter on `PATH` is too old. |
+| Android | SDK with a device or emulator |
+| iOS | Xcode on macOS |
 
-The app uses the [`material_ui`](https://pub.dev/packages/material_ui) package instead of `package:flutter/material.dart`, which needs this newer SDK. Older Flutter versions fail at `flutter pub get` with a "requires SDK version ^3.13.0" error. Run `flutter upgrade` to fix it.
+The app uses [`material_ui`](https://pub.dev/packages/material_ui) instead of the deprecated `package:flutter/material.dart`.
 
 ## Getting started
 
 ```bash
-git clone https://github.com/yugmewada/flutter-arc.git
-cd flutter-arc
-flutter pub get
+git clone https://github.com/yugmewada/medicine-reminder-app.git
+cd medicine-reminder-app
+export PATH=/opt/flutter/bin:$PATH   # Flutter 3.50 (adjust to your install)
+flutter pub get                 # also generates localizations
+dart run build_runner build     # Freezed models + auto_route routes (generated files are committed)
 flutter run
 ```
 
@@ -37,64 +44,53 @@ flutter run
 
 ```
 lib/
-├── main.dart                     # Entry point; registers font licenses
-├── app/
-│   └── app.dart                  # MaterialApp, themes, and Welcome screen wiring
-├── core/
-│   ├── theme/
-│   │   ├── app_colors.dart       # Raw brand palette (not used directly by widgets)
-│   │   ├── app_theme.dart        # Light/dark ThemeData, fonts, button themes
-│   │   ├── app_tokens.dart       # Spacing, radius, and size tokens
-│   │   └── brand_colors.dart     # ThemeExtension for brand-specific color roles
-│   └── widgets/
-│       └── brand_logo.dart       # App logo drawn with CustomPainter
-└── features/
-    └── auth/
-        └── presentation/
-            ├── welcome_screen.dart
-            └── widgets/
-                ├── social_sign_in_button.dart
-                └── welcome_hero.dart
-
-assets/
-├── fonts/                        # Playfair Display, Outfit
-└── licenses/                     # OFL license texts for the bundled fonts
-
-test/
-├── widget_test.dart              # App launches on the Welcome screen
-└── features/auth/presentation/
-    └── welcome_screen_test.dart  # Content, callbacks, a11y, layouts, platforms, dark theme
+  app/            # MaterialApp.router; router/ = AppRouter (auto_route), guard, navigation policy
+  core/           # theme tokens, shared widgets, transitions, l10n helper, formatting,
+                  #   providers, utils/ (MediaPicker, DayUtils, Validators)
+  l10n/           # app_en.arb (source strings) + generated AppLocalizations
+  features/       # session, splash, onboarding, auth, shell, today, medicines, profile
+                  #   each: domain/ (Freezed models, rules) + presentation/ (Riverpod MVI)
+docs/
+  MASTER_PROMPT.md
+test/             # unit, widget, flow, accessibility and layout tests
 ```
 
-New features go under `lib/features/<feature>/`. Code shared between features goes in `lib/core/`.
+## Image picking
+
+There is one cross-platform picker: `MediaPicker` in `lib/core/utils/media_picker.dart`, which wraps `image_picker` and is gallery only.
+
+- **Android** always uses the system Photo Picker (`PickVisualMedia`), so it needs no media permissions. The manifest explicitly removes `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` and `READ_EXTERNAL_STORAGE`.
+- **iOS** uses PHPicker. `NSPhotoLibraryUsageDescription` is set for the iOS 13 fallback.
 
 ## Design system
 
-Widgets read styling from the theme instead of hard-coding values:
+The font is **Outfit** (400/500/600, SIL OFL). Colors are semantic roles from the theme; there are no hex values in widgets.
 
-- **Colors**: use `Theme.of(context).colorScheme` for Material roles and `BrandColors.of(context)` for brand roles (`accent`, `onAccent`, `mutedInk`). `AppColors` is the raw palette and is only referenced by the theme.
-- **Spacing and sizes**: use `AppSpacing` (4–48), `AppRadius` (8–28) and `AppSizes` from `app_tokens.dart`.
-- **Typography**: use `Theme.of(context).textTheme`. `headlineMedium` uses Playfair Display; other styles use Outfit.
-
-| Token | Value |
+| Role | Colour |
 | --- | --- |
-| Brand blue (primary) | `#3350CB` |
-| Brand yellow (accent) | `#F2FF33` |
-| Ink (text) | `#262626` |
-| Slate ink (muted text) | `#1F394E` |
+| primary | `#3350CB` |
+| surface / card | `#F6F7FB` / `#FFFFFF` |
+| text / muted | `#1B2030` / `#596178` |
+| success (Taken) | `#1D7A4C` |
+| warning (Skipped) | `#8F5200` |
+| error | `#BA2F2A` |
 
-## Testing and analysis
+## Testing
 
 ```bash
+dart run build_runner build && flutter gen-l10n
+dart format lib test
 flutter analyze
 flutter test
 ```
 
-The widget tests cover the Welcome screen's content, that each button reaches its callback, accessible labels and touch targets, no overflow across screen sizes, the iOS/Android social button sets, and dark theme rendering.
-
 ## Known placeholders
 
-- **Brand logo**: drawn in code from the design screenshot. Replace it with the official vector asset exported from Figma.
-- **Google mark**: a plain "G" stands in for Google's official multicolor logo, which Google's sign-in branding guidelines require.
-- **Hero image**: `WelcomeScreen` accepts an optional `heroImage`. A branded gradient placeholder is shown until one is supplied.
-- **App ID**: the Android/iOS bundle ID is still `com.example.demo_project` and must be changed before release.
+The following are placeholders to replace before any real release:
+
+- the code-drawn logo and illustrations
+- the Google "G" mark
+- the default native launch screens
+- the `com.example.demo_project` application ID
+
+See [docs/MASTER_PROMPT.md §9](docs/MASTER_PROMPT.md#9-known-placeholders-replace-when-real-assets-exist).

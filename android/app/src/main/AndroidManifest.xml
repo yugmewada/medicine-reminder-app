@@ -1,6 +1,16 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Photos are picked with the system Photo Picker
+         (ActivityResultContracts.PickVisualMedia), which needs no media
+         permission. Strip these in case any dependency declares them.
+         See docs/MASTER_PROMPT.md > Image picking. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" tools:node="remove" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
+
     <application
-        android:label="demo_project"
+        android:label="Doseza"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
