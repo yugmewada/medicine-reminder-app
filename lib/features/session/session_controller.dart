@@ -94,34 +94,42 @@ class SessionController extends Notifier<SessionState> {
     state = state.copyWith(stage: AppStage.welcome, hasSeenOnboarding: true);
   }
 
-  /// Enters the app. Google/Apple (simulated) use the fictional
-  /// [DemoProfile.sample]; a guest has no profile and is restricted.
+  /// Enters the app with a fresh dataset for this identity: Google/Apple
+  /// (simulated) get [DemoProfile.sample] and the sample medicines; a guest
+  /// has no profile, no medicines, and is restricted.
   void signIn(SignInMethod method) {
     state = state.copyWith(
       stage: AppStage.signedIn,
       profile: method.isGuest ? null : DemoProfile.sample,
       method: method,
     );
+    // After the state change, so data providers rebuild for the new user.
+    _resetData();
   }
 
-  /// A guest signs in (simulated) without leaving the app. Session data
-  /// (medicines, logs) is kept; restrictions are lifted.
-  void upgradeGuest(SignInMethod method) {
-    assert(!method.isGuest);
+  /// A guest chose to sign in: return to Welcome to pick Google/Apple (or
+  /// continue as guest again). Signing in there loads that user's data.
+  void requestSignIn() {
     if (!state.isGuest) return;
-    state = state.copyWith(profile: DemoProfile.sample, method: method);
+    state = state.copyWith(stage: AppStage.welcome);
   }
 
   /// Returns to Welcome and discards every in-memory demo change.
   void logout() {
-    ref
-      ..invalidate(medicinesProvider)
-      ..invalidate(doseLogProvider)
-      ..invalidate(selectedDateProvider);
+    _resetData();
     state = state.copyWith(
       stage: AppStage.welcome,
       profile: null,
       method: null,
     );
+  }
+
+  /// Discards session data; providers rebuild on next read for the
+  /// current user (see `MedicinesController.build`).
+  void _resetData() {
+    ref
+      ..invalidate(medicinesProvider)
+      ..invalidate(doseLogProvider)
+      ..invalidate(selectedDateProvider);
   }
 }

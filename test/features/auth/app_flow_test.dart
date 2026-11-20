@@ -34,7 +34,7 @@ void main() {
     await tapAndSettle(tester, find.text('Continue to demo'));
 
     expect(find.text('Good morning, Jordan'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppTabBar), findsOneWidget);
   });
 
   testWidgets('cancelling the demo sign-in dialog stays on Welcome', (

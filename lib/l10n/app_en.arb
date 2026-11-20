@@ -138,7 +138,7 @@
   "@continueAsGuest": {
     "description": "Enters the app as a guest (view and log doses; cannot change medicines)."
   },
-  "guestLimitsNote": "As a guest you can view medicines and log doses. Sign in to add, edit or delete them.",
+  "guestLimitsNote": "As a guest you can explore the app without any medicines. Sign in to add and manage your own.",
   "@guestLimitsNote": {
     "description": "Welcome-screen note explaining guest restrictions."
   },
@@ -175,6 +175,18 @@
   "navProfile": "Profile",
   "@navProfile": {
     "description": "Bottom navigation: profile tab."
+  },
+  "tabPositionHint": "Tab {position} of {count}",
+  "@tabPositionHint": {
+    "description": "Screen-reader hint on each bottom tab, e.g. Tab 1 of 3.",
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "greeting": "{period, select, morning{Good morning, {name}} afternoon{Good afternoon, {name}} other{Good evening, {name}}}",
   "@greeting": {
@@ -921,53 +933,15 @@
   },
   "signIn": "Sign in",
   "@signIn": {
-    "description": "Opens the (simulated) sign-in prompt."
+    "description": "Button that takes a guest to the welcome screen to sign in (simulated)."
   },
   "signInPromptTitle": "Sign in to manage medicines",
   "@signInPromptTitle": {
-    "description": "Title of the sign-in prompt shown to guests."
+    "description": "Title of the alert shown when a guest tries to add, edit or delete a medicine."
   },
-  "signInPromptMessage": "Guests can view medicines and log doses. Sign in to add, edit or delete medicines.",
+  "signInPromptMessage": "You're using the app as a guest. Sign in to add, edit or delete medicines.",
   "@signInPromptMessage": {
-    "description": "Explains guest restrictions in the sign-in prompt."
-  },
-  "notNow": "Not now",
-  "@notNow": {
-    "description": "Closes the sign-in prompt."
-  },
-  "signedInUpgrade": "Signed in with {provider} (simulated). You can now manage medicines.",
-  "@signedInUpgrade": {
-    "description": "Snackbar after a guest signs in.",
-    "placeholders": {
-      "provider": {
-        "type": "String",
-        "example": "Google"
-      }
-    }
-  },
-  "inventoryGuestBanner": "You're browsing as a guest. Sign in to add, edit or delete medicines.",
-  "@inventoryGuestBanner": {
-    "description": "Banner on the inventory for guests."
-  },
-  "exitGuestTitle": "Exit guest mode",
-  "@exitGuestTitle": {
-    "description": "Profile row for guests (instead of Log out)."
-  },
-  "exitGuestSubtitle": "Returns to the welcome screen",
-  "@exitGuestSubtitle": {
-    "description": "Subtitle of the exit-guest row."
-  },
-  "exitGuestConfirmTitle": "Exit guest mode?",
-  "@exitGuestConfirmTitle": {
-    "description": "Confirmation title when a guest exits."
-  },
-  "exitGuestConfirmMessage": "You will return to the welcome screen. Doses you logged in this session will be reset.",
-  "@exitGuestConfirmMessage": {
-    "description": "Confirmation message when a guest exits."
-  },
-  "exitedGuestMode": "Exited guest mode. Session changes were cleared.",
-  "@exitedGuestMode": {
-    "description": "Snackbar after a guest exits."
+    "description": "Alert message shown when a guest tries a restricted action."
   },
   "demoProfileSimulated": "Demo profile · {provider} sign-in simulated",
   "@demoProfileSimulated": {

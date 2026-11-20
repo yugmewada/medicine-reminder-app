@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../session/session_controller.dart';
 import '../data/sample_medicines.dart';
 import '../domain/medicine.dart';
 
@@ -8,13 +9,19 @@ final medicinesProvider = NotifierProvider<MedicinesController, List<Medicine>>(
   MedicinesController.new,
 );
 
-/// Session-only inventory, seeded with fictional sample medicines.
-/// Resets on logout (see `SessionController.logout`) and on app restart.
+/// Session-only inventory. Signed-in users start with the fictional sample
+/// medicines; guests start empty (and cannot add any).
+///
+/// The session only *reads* here (no watch): `SessionController` resets this
+/// provider on every sign-in and on logout, so each identity gets a fresh
+/// dataset. (Watching the session would make that reset circular.)
 class MedicinesController extends Notifier<List<Medicine>> {
   var _nextId = 0;
 
   @override
-  List<Medicine> build() => sampleMedicines(ref.read(clockProvider)());
+  List<Medicine> build() => ref.read(sessionProvider).isGuest
+      ? const []
+      : sampleMedicines(ref.read(clockProvider)());
 
   /// Creates an id for a medicine that has not been saved yet.
   String newId() =>

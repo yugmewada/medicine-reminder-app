@@ -10,11 +10,8 @@ import '../theme/app_tokens.dart';
 ///   forms, licenses, not found) uses one transition: the platform push from
 ///   `AppTheme.pageTransitionsTheme` (Android zoom with predictive back, iOS
 ///   slide), built by [AppPageRoute]. It is the router's default route type.
-/// - **Bottom-tab switches** fade through ([AnimatedBranchContainer]).
+/// - **Bottom-tab switches** cross-fade in 150 ms ([AnimatedBranchContainer]).
 abstract final class AppTransitions {
-  /// Outgoing tab fades out during the first 35% of a tab switch.
-  static const Interval _outgoing = Interval(0, 0.35, curve: AppMotion.exit);
-
   /// auto_route default route builder: every screen uses [AppPageRoute].
   static Route<T> pushRoute<T>(
     BuildContext context,
@@ -26,12 +23,6 @@ abstract final class AppTransitions {
     maintainState: page.maintainState,
     builder: (_) => child,
   );
-
-  /// Opacity for the tab leaving during fade-through (1 → 0 early on).
-  static Animation<double> outgoing(Animation<double> animation) => Tween(
-    begin: 1.0,
-    end: 0.0,
-  ).animate(CurvedAnimation(parent: animation, curve: _outgoing));
 }
 
 /// The app's screen route: platform push (zoom/predictive back on Android,
@@ -55,9 +46,9 @@ class AppPageRoute<T> extends MaterialPageRoute<T> {
   );
 }
 
-/// Tab container (used with `AutoTabsRouter.builder`) that fades through
-/// when switching tabs, while keeping every tab (and its nested stack,
-/// scroll position and state) alive.
+/// Tab container (used with `AutoTabsRouter.builder`) that cross-fades
+/// quickly when switching tabs, while keeping every tab (and its nested
+/// stack, scroll position and state) alive.
 ///
 /// The widget structure around each branch never changes, only the
 /// animations do, so switching tabs never remounts a branch.
@@ -78,10 +69,17 @@ class AnimatedBranchContainer extends StatefulWidget {
 
 class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
     with SingleTickerProviderStateMixin {
-  // preserve: see FadeThroughPage. Under reduced motion the switch is a
-  // short dissolve; without this Flutter would make it instant.
+  /// Tab switches must feel instant (iOS doesn't animate them at all): a
+  /// short cross-fade where the new tab is visible from the first frame.
+  static const Duration _duration = AppMotion.short;
+
+  // Deliberately NOT frame-clamped: unlike screen pushes, a tab switch must
+  // finish on time even when frames are slow, so a slow frame completes it
+  // sooner rather than stretching it. `preserve` keeps the brief fade when
+  // the OS disables animations (Flutter would otherwise cut it to 5%).
   late final AnimationController _controller = AnimationController(
-    vsync: FrameClampedTickerProvider(this),
+    vsync: this,
+    duration: _duration,
     value: 1,
     animationBehavior: AnimationBehavior.preserve,
   );
@@ -94,11 +92,9 @@ class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
     super.didUpdateWidget(old);
     if (old.currentIndex == widget.currentIndex) return;
     _previous = old.currentIndex;
-    _controller
-      ..duration = AppMotion.pageOf(context)
-      ..forward(from: 0).whenCompleteOrCancel(() {
-        if (mounted) setState(() => _previous = null);
-      });
+    _controller.forward(from: 0).whenCompleteOrCancel(() {
+      if (mounted) setState(() => _previous = null);
+    });
   }
 
   @override
@@ -109,17 +105,15 @@ class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
 
   @override
   Widget build(BuildContext context) {
-    final reduced = AppMotion.reduced(context);
     const idle = AlwaysStoppedAnimation<double>(1);
+    // Cross-fade: the new tab fades in while the old one fades out, both
+    // from the first frame. No scaling (it is costly for a full screen and
+    // reads as slow), so this is identical with reduced motion.
     final incoming = CurvedAnimation(
       parent: _controller,
-      curve: reduced
-          ? AppMotion.enter
-          : const Interval(0.35, 1, curve: AppMotion.enter),
+      curve: AppMotion.enter,
     );
-    final scale = reduced
-        ? idle
-        : Tween(begin: 0.92, end: 1.0).animate(incoming);
+    final outgoing = ReverseAnimation(incoming);
 
     return Stack(
       fit: StackFit.expand,
@@ -131,9 +125,8 @@ class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
             opacity: i == widget.currentIndex
                 ? incoming
                 : i == _previous
-                ? AppTransitions.outgoing(_controller)
+                ? outgoing
                 : idle,
-            scale: i == widget.currentIndex ? scale : idle,
           ),
       ],
     );
@@ -143,7 +136,6 @@ class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
     required int index,
     required Widget child,
     required Animation<double> opacity,
-    required Animation<double> scale,
   }) {
     final active = index == widget.currentIndex;
     final visible = active || index == _previous;
@@ -155,9 +147,11 @@ class _AnimatedBranchContainerState extends State<AnimatedBranchContainer>
           excluding: !active,
           child: IgnorePointer(
             ignoring: !active,
+            // RepaintBoundary: the cross-fade only blends the tab's cached
+            // layer instead of repainting the whole tab on every frame.
             child: FadeTransition(
               opacity: opacity,
-              child: ScaleTransition(scale: scale, child: child),
+              child: RepaintBoundary(child: child),
             ),
           ),
         ),

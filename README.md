@@ -9,7 +9,7 @@ A Flutter **medicine tracker prototype** for Android and iOS: splash, onboarding
 ## Features
 
 - **Splash → onboarding (3 pages, skippable) → welcome.** Google and Apple entry points explain that sign-in is simulated and give full access.
-- **Guest mode:** "Continue as guest" lets people view medicines and log doses. Adding, editing or deleting medicines asks them to sign in (simulated), which keeps their session data and unlocks everything.
+- **Guest mode:** "Continue as guest" opens the app with no data, so every screen shows its empty state. Adding medicines shows a sign-in alert; signing in (simulated) unlocks everything and loads the sample data.
 - **Today:** a greeting with the first name, a scrollable date strip (today ±14 days), and a progress ring showing *"1 of 5 scheduled doses logged as taken — 20%"*. Each dose card has Taken / Skip / Undo, with an Undo action in the top snackbar too. There is an empty state for days with nothing scheduled, and future days cannot be logged.
 - **Inventory:** sample medicines with stock in explicit units, a detail view, and an add/edit form. The form covers name, type, frequency (daily / weekly / monthly), demo schedule times, quantity plus unit, and an optional photo. It validates input and asks before discarding changes.
 - **Profile:** demo profile, plus honest placeholder dialogs for Terms, Privacy and Share. It also has open-source licenses, the app version, and a Log out action that resets every session change.

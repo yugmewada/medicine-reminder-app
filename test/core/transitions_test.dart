@@ -109,16 +109,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(MedicineFormScreen), findsNothing);
     });
-
-    testWidgets('switching tabs', (tester) async {
-      await pumpApp(tester);
-      await tester.tap(find.byKey(const ValueKey('nav-inventory')));
-      await slowFirstFrame(tester);
-      // Outgoing tab is mid-fade instead of having vanished.
-      expect(opacityOf(TodayScreen), inExclusiveRange(0, 1));
-      await tester.pumpAndSettle();
-      expect(opacityOf(InventoryScreen), 1);
-    });
   });
 
   testWidgets('every screen uses the same transition as Add medicine', (
@@ -191,11 +181,12 @@ void main() {
       MedicineDetailScreen,
       () => tap('medicine-sample-brevora'),
     );
-    await openAndCheck(
-      'edit medicine',
-      EditMedicineScreen,
-      () => tap('edit-medicine'),
-    );
+    await openAndCheck('edit medicine', EditMedicineScreen, () async {
+      final editButton = find.text('Edit medicine');
+      await tester.ensureVisible(editButton);
+      await tester.pumpAndSettle(frame60Hz);
+      await tester.tap(editButton);
+    });
     await tap('cancel-medicine');
     await tester.pumpAndSettle(frame60Hz);
     await tester.tap(find.byKey(const ValueKey('nav-profile')));
@@ -221,23 +212,36 @@ void main() {
     ]);
   });
 
-  testWidgets('switching tabs fades through and keeps the old tab alive', (
+  testWidgets('switching tabs is a quick cross-fade; old tab stays alive', (
     tester,
   ) async {
     await pumpApp(tester);
     await tester.tap(find.byKey(const ValueKey('nav-inventory')));
     await tester.pump();
-    await pumpFrames(tester, const Duration(milliseconds: 60));
-    // Outgoing tab is still visible and fading out.
-    expect(find.byType(TodayScreen), findsOneWidget);
+    await pumpFrames(tester, const Duration(milliseconds: 32));
+    // The new tab is already appearing (no delayed phase), the old one is
+    // fading out, and nothing is scaled.
+    expect(opacityOf(InventoryScreen), greaterThanOrEqualTo(0.5));
     expect(opacityOf(TodayScreen), inExclusiveRange(0, 1));
-    await pumpFrames(tester, const Duration(milliseconds: 120));
-    expect(opacityOf(InventoryScreen), inExclusiveRange(0, 1));
-    await tester.pumpAndSettle();
+    expect(scaleOf(InventoryScreen), 1);
+    // Done within ~150 ms.
+    await pumpFrames(tester, const Duration(milliseconds: 128));
     expect(opacityOf(InventoryScreen), 1);
-    // Old tab is offstage but still mounted (state preserved).
     expect(find.byType(TodayScreen), findsNothing);
+    // Old tab is offstage but still mounted (state preserved).
     expect(find.byType(TodayScreen, skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('a slow frame finishes a tab switch on time (no stretching)', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await tester.tap(find.byKey(const ValueKey('nav-inventory')));
+    await slowFirstFrame(tester); // one 500 ms frame
+    // Unlike screen pushes, tab switches are not frame-clamped: they must
+    // feel instant, so the switch is already complete.
+    expect(opacityOf(InventoryScreen), 1);
+    expect(find.byType(TodayScreen), findsNothing);
   });
 
   testWidgets('drill-down uses an animated push', (tester) async {

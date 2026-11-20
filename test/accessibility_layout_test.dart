@@ -115,7 +115,9 @@ void main() {
   for (final guest in [false, true]) {
     final who = guest ? 'guest' : 'signed in';
     for (final MapEntry(key: screen, value: open) in screens.entries) {
-      if (guest && screen == 'Add medicine form') continue; // not for guests
+      // Guests have no medicines and cannot open the form.
+      if (guest && screen == 'Add medicine form') continue;
+      if (guest && screen == 'Medicine detail') continue;
       testWidgets('$screen ($who): tap targets, labels and contrast', (
         tester,
       ) async {

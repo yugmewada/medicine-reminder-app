@@ -15,7 +15,7 @@ void main() {
     expect(find.byType(MedicineDetailScreen), findsOneWidget);
     expect(find.text('Ceralin'), findsWidgets);
     // Detail lives in the Inventory tab, so the tab bar stays visible.
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppTabBar), findsOneWidget);
   });
 
   testWidgets('a malformed medicine id shows a recoverable state', (
@@ -56,7 +56,8 @@ void main() {
     await tester.tap(find.byType(BrandLogo));
     await tester.pumpAndSettle();
     await tapAndSettle(tester, find.byKey(const ValueKey('onboarding-skip')));
-    await tapAndSettle(tester, find.byKey(const ValueKey('continue-guest')));
+    await tapAndSettle(tester, find.byKey(const ValueKey('social-google')));
+    await tapAndSettle(tester, find.text('Continue to demo'));
     expect(find.byType(MedicineDetailScreen), findsOneWidget);
     expect(find.text('Omnivy'), findsWidgets);
   });
@@ -128,6 +129,6 @@ void main() {
     await tapAndSettle(tester, find.byKey(const ValueKey('nav-inventory')));
     await tapAndSettle(tester, find.byKey(const ValueKey('add-medicine')));
     expect(find.byKey(const ValueKey('save-medicine')), findsOneWidget);
-    expect(find.byType(NavigationBar).hitTestable(), findsNothing);
+    expect(find.byType(AppTabBar).hitTestable(), findsNothing);
   });
 }

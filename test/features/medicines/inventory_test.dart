@@ -109,7 +109,7 @@ void main() {
     expect(find.text('18 capsules'), findsOneWidget);
     expect(find.text('Daily · Every day'), findsOneWidget);
 
-    await tapAndSettle(tester, find.byKey(const ValueKey('edit-medicine')));
+    await tapAndSettle(tester, find.text('Edit medicine'));
     expect(find.text('Edit medicine'), findsWidgets);
     await tester.enterText(find.byKey(const ValueKey('field-quantity')), '30');
     await tapAndSettle(tester, find.byKey(const ValueKey('save-medicine')));

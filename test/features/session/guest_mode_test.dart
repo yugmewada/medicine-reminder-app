@@ -1,28 +1,30 @@
-import 'package:demo_project/core/widgets/widgets.dart';
-import 'package:demo_project/features/medicines/presentation/medicine_detail_screen.dart';
 import 'package:demo_project/features/medicines/presentation/medicine_form_screen.dart';
+import 'package:demo_project/features/medicines/presentation/medicines_controller.dart';
 import 'package:demo_project/features/session/session_controller.dart';
-import 'package:demo_project/features/today/domain/dose_schedule.dart';
-import 'package:demo_project/features/today/presentation/today_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../helpers/test_app.dart';
 
 void main() {
-  final prompt = find.byKey(const ValueKey('sign-in-prompt'));
+  // The sign-in alert (same style as the logout confirmation).
+  final prompt = find.widgetWithText(
+    AlertDialog,
+    'Sign in to manage medicines',
+  );
   Finder key(String k) => find.byKey(ValueKey(k));
+  final alertSignIn = find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.widgetWithText(TextButton, 'Sign in'),
+  );
 
-  Future<void> openInventory(WidgetTester tester) =>
-      tapAndSettle(tester, key('nav-inventory'));
-
-  Future<void> notNow(WidgetTester tester) async {
-    await tapAndSettle(tester, key('sign-in-not-now'));
+  Future<void> cancel(WidgetTester tester) async {
+    await tapAndSettle(tester, find.widgetWithText(TextButton, 'Cancel'));
     expect(prompt, findsNothing);
   }
 
   group('SessionController', () {
-    test('a guest has no profile and cannot manage medicines', () {
+    test('a guest has no profile, no medicines, and cannot manage', () {
       final c = testContainer();
       c.read(sessionProvider.notifier).signIn(SignInMethod.guest);
       final s = c.read(sessionProvider);
@@ -30,117 +32,110 @@ void main() {
       expect(s.profile, isNull);
       expect(s.canManageMedicines, isFalse);
       expect(c.read(canManageMedicinesProvider), isFalse);
+      expect(c.read(medicinesProvider), isEmpty);
     });
 
-    test('a guest signing in keeps session data and gains access', () {
+    test('a guest who signs in gets the sample medicines', () {
       final c = testContainer();
       final session = c.read(sessionProvider.notifier)
         ..signIn(SignInMethod.guest);
-      c.read(doseLogProvider.notifier).log('x', DoseStatus.taken);
-      session.upgradeGuest(SignInMethod.apple);
+      expect(c.read(medicinesProvider), isEmpty);
+      session.requestSignIn();
+      expect(c.read(sessionProvider).stage, AppStage.welcome);
+      session.signIn(SignInMethod.apple);
       final s = c.read(sessionProvider);
-      expect(s.method, SignInMethod.apple);
       expect(s.profile, DemoProfile.sample);
       expect(s.canManageMedicines, isTrue);
-      expect(s.stage, AppStage.signedIn);
-      expect(c.read(doseLogProvider), {'x': DoseStatus.taken});
+      expect(c.read(medicinesProvider), hasLength(5));
     });
 
-    test('Google/Apple users can manage medicines', () {
+    test('requestSignIn does nothing for signed-in users', () {
       final c = testContainer();
-      c.read(sessionProvider.notifier).signIn(SignInMethod.google);
-      expect(c.read(sessionProvider).canManageMedicines, isTrue);
+      c.read(sessionProvider.notifier)
+        ..signIn(SignInMethod.google)
+        ..requestSignIn();
+      expect(c.read(sessionProvider).stage, AppStage.signedIn);
     });
   });
 
-  testWidgets('guest can view and log doses, greeted without a name', (
+  testWidgets('guest sees empty screens instead of sample data', (
     tester,
   ) async {
     await pumpApp(tester, guest: true);
     expect(find.text('Good morning'), findsOneWidget);
-    await tapAndSettle(
-      tester,
-      key('dose-taken-sample-brevora|2026-11-19|08:00'),
-    );
-    expect(find.textContaining('1 of 4'), findsOneWidget);
-    expect(prompt, findsNothing);
+    expect(find.text('No doses scheduled for this day'), findsOneWidget);
+    expect(find.text('Nothing scheduled'), findsOneWidget);
+    expect(find.text('Brevora'), findsNothing);
+
+    await tapAndSettle(tester, key('nav-inventory'));
+    expect(find.text('No medicines yet'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.text('Brevora'), findsNothing);
   });
 
-  testWidgets('guest: every medicine change asks to sign in first', (
+  testWidgets('guest: Add asks to sign in (Inventory and Today)', (
     tester,
   ) async {
     await pumpApp(tester, guest: true);
-    await openInventory(tester);
-    expect(key('guest-banner'), findsOneWidget);
 
-    // Add
-    await tapAndSettle(tester, key('add-medicine'));
-    expect(prompt, findsOneWidget);
-    expect(find.text('Sign in to manage medicines'), findsOneWidget);
-    await notNow(tester);
-    expect(find.byType(MedicineFormScreen), findsNothing);
-
-    // Swipe Edit and Delete
-    await tester.drag(key('medicine-sample-brevora'), const Offset(-300, 0));
-    await tester.pumpAndSettle(frame60Hz);
-    await tapAndSettle(tester, key('swipe-edit-sample-brevora'));
-    expect(prompt, findsOneWidget);
-    await notNow(tester);
-    await tester.drag(key('medicine-sample-brevora'), const Offset(-300, 0));
-    await tester.pumpAndSettle(frame60Hz);
-    await tapAndSettle(tester, key('swipe-delete-sample-brevora'));
-    expect(prompt, findsOneWidget);
-    await notNow(tester);
-    expect(find.text('Delete Brevora?'), findsNothing);
-    expect(key('medicine-sample-brevora'), findsOneWidget);
-
-    // Detail: viewing is allowed; Edit and Delete are not.
-    await tapAndSettle(tester, key('medicine-sample-ceralin'));
-    expect(find.byType(MedicineDetailScreen), findsOneWidget);
-    for (final action in [
-      'edit-medicine',
-      'delete-medicine',
-      'delete-medicine-button',
-    ]) {
-      await tapAndSettle(tester, key(action));
-      expect(prompt, findsOneWidget, reason: action);
-      await notNow(tester);
-    }
-    expect(find.byType(MedicineFormScreen), findsNothing);
-  });
-
-  testWidgets('signing in from the prompt continues the action', (
-    tester,
-  ) async {
-    await pumpApp(tester, guest: true);
+    // Today's empty state.
     await tapAndSettle(
       tester,
-      key('dose-taken-sample-brevora|2026-11-19|08:00'),
+      find.widgetWithText(OutlinedButton, 'Add medicine'),
     );
-    TopSnackbar.dismiss();
-    await tester.pumpAndSettle(frame60Hz);
-    await openInventory(tester);
-
-    await tapAndSettle(tester, key('add-medicine'));
-    await tapAndSettle(tester, key('social-google'));
+    expect(prompt, findsOneWidget);
     expect(
       find.text(
-        'Signed in with Google (simulated). You can now manage medicines.',
+        "You're using the app as a guest. "
+        'Sign in to add, edit or delete medicines.',
       ),
       findsOneWidget,
     );
-    // The add form opens straight away; the guest banner is gone.
-    expect(find.byType(MedicineFormScreen), findsOneWidget);
-    await tapAndSettle(tester, key('cancel-medicine'));
-    expect(key('guest-banner'), findsNothing);
+    await cancel(tester);
+    expect(find.byType(MedicineFormScreen), findsNothing);
 
-    // Session data survived the sign-in.
-    await tapAndSettle(tester, key('nav-today'));
-    expect(find.text('Good morning, Jordan'), findsOneWidget);
-    expect(find.textContaining('1 of 4'), findsOneWidget);
+    // Inventory's empty state.
+    await tapAndSettle(tester, key('nav-inventory'));
+    await tapAndSettle(tester, key('add-medicine'));
+    expect(prompt, findsOneWidget);
+    await cancel(tester);
+    expect(find.byType(MedicineFormScreen), findsNothing);
   });
 
-  testWidgets('guest profile: Guest identity, sign in, exit guest mode', (
+  testWidgets('alert Sign in → Welcome → Google gives full access', (
+    tester,
+  ) async {
+    await pumpApp(tester, guest: true);
+    await tapAndSettle(tester, key('nav-inventory'));
+    await tapAndSettle(tester, key('add-medicine'));
+    await tapAndSettle(tester, alertSignIn);
+    expect(find.text('Welcome!'), findsOneWidget);
+
+    await tapAndSettle(tester, key('social-google'));
+    await tapAndSettle(tester, find.text('Continue to demo'));
+    expect(find.text('Good morning, Jordan'), findsOneWidget);
+    expect(find.textContaining('0 of 4'), findsOneWidget);
+
+    await tapAndSettle(tester, key('nav-inventory'));
+    expect(find.text('Brevora'), findsOneWidget);
+    await tapAndSettle(tester, key('add-medicine'));
+    expect(prompt, findsNothing);
+    expect(find.byType(MedicineFormScreen), findsOneWidget);
+  });
+
+  testWidgets('from Welcome a guest can continue as guest again', (
+    tester,
+  ) async {
+    await pumpApp(tester, guest: true);
+    await tapAndSettle(tester, key('nav-profile'));
+    await tapAndSettle(tester, key('profile-sign-in'));
+    expect(find.text('Welcome!'), findsOneWidget);
+    await tapAndSettle(tester, key('continue-guest'));
+    expect(find.text('Good morning'), findsOneWidget);
+    expect(find.text('Nothing scheduled'), findsOneWidget);
+  });
+
+  testWidgets('guest profile: Guest identity, Sign in, no logout row', (
     tester,
   ) async {
     await pumpApp(tester, guest: true);
@@ -149,37 +144,23 @@ void main() {
     expect(find.text('Browsing as a guest'), findsOneWidget);
     expect(find.text('Guest mode'), findsOneWidget);
     expect(find.text('Jordan Ellis'), findsNothing);
+    expect(key('row-logout'), findsNothing);
+    expect(find.text('Exit guest mode'), findsNothing);
+    expect(find.text('Log out'), findsNothing);
 
     await tapAndSettle(tester, key('profile-sign-in'));
-    expect(prompt, findsOneWidget);
-    await notNow(tester);
-
-    await tapAndSettle(tester, key('row-logout'));
-    expect(find.text('Exit guest mode?'), findsOneWidget);
-    await tapAndSettle(
-      tester,
-      find.widgetWithText(TextButton, 'Exit guest mode'),
-    );
     expect(find.text('Welcome!'), findsOneWidget);
-    expect(
-      find.text('Exited guest mode. Session changes were cleared.'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('guest profile sign-in switches to the signed-in profile', (
-    tester,
-  ) async {
-    await pumpApp(tester, guest: true);
-    await tapAndSettle(tester, key('nav-profile'));
-    await tapAndSettle(tester, key('profile-sign-in'));
     await tapAndSettle(tester, key('social-apple'));
+    await tapAndSettle(tester, find.text('Continue to demo'));
+    await tapAndSettle(tester, key('nav-profile'));
     expect(find.text('Jordan Ellis'), findsOneWidget);
     expect(find.text('Demo profile · Apple sign-in simulated'), findsOneWidget);
-    expect(find.text('Log out'), findsOneWidget);
+    expect(key('row-logout'), findsOneWidget);
   });
 
-  testWidgets('guest deep links to Add/Edit are blocked', (tester) async {
+  testWidgets('guest deep links: Add/Edit blocked, sample ids not found', (
+    tester,
+  ) async {
     await pumpApp(tester, guest: true);
     for (final path in [
       '/inventory/add',
@@ -189,9 +170,8 @@ void main() {
       await tester.pumpAndSettle(frame60Hz);
       expect(find.byType(MedicineFormScreen), findsNothing, reason: path);
     }
-    // Viewing a medicine by link is fine.
     await routerOf(tester).navigatePath('/inventory/medicine/sample-brevora');
     await tester.pumpAndSettle(frame60Hz);
-    expect(find.byType(MedicineDetailScreen), findsOneWidget);
+    expect(find.text('Medicine not found'), findsOneWidget);
   });
 }

@@ -93,7 +93,7 @@ lib/
   features/
     session/session_controller.dart   # AppStage, SignInMethod, DemoProfile, SessionState (Freezed)
     splash/ onboarding/ auth/          # pre-sign-in screens
-    shell/home_shell.dart              # bottom NavigationBar over StatefulNavigationShell
+    shell/home_shell.dart              # AutoTabsRouter + AppTabBar (floating glass pill) + AnimatedBranchContainer
     shell/not_found_screen.dart        # unknown-link fallback
     today/      domain/dose_schedule.dart (pure rules, Freezed) · presentation/ (controller, screen, widgets)
     medicines/  domain/medicine.dart (Freezed) · data/sample_medicines.dart
@@ -187,7 +187,7 @@ The palette is light only; the app has no dark mode.
 | Role | Value | Notes |
 | --- | --- | --- |
 | `primary` / `onPrimary` | `#3350CB` / `#FFFFFF` | 6.7:1 |
-| `primaryContainer` / `onPrimaryContainer` | `#E7EBFC` / `#1B2A78` | progress card, selected chips, guest banner |
+| `primaryContainer` / `onPrimaryContainer` | `#E7EBFC` / `#1B2A78` | progress card, selected chips |
 | `surface` (page) | `#F6F7FB` | |
 | `surfaceContainerLowest` (cards) | `#FFFFFF` | |
 | `surfaceContainerHigh` / `Highest` | `#EEF0F6` / `#E5E8F0` | |
@@ -214,6 +214,45 @@ All text pairs meet WCAG AA. In widgets, use `context.colors`, `context.status` 
 - Use `ChoiceGroup` instead of `SegmentedButton`, which overflows at large text sizes.
 - Icon-only controls need a localized tooltip or label.
 
+### Bottom navigation (`AppTabBar`, `lib/core/widgets/app_tab_bar.dart`)
+
+The bar is a **floating frosted-glass pill**. It was chosen after researching the iOS 26 tab bar (floating, Liquid Glass, capsule highlight), Material 3 Expressive (a shorter 64dp bar), and the industry move to floating pills (Google Photos, Oura).
+
+**Shape and material:**
+- 64dp of content inside a 6dp inset.
+- Stadium shape with 16dp side margins and a maximum width of 440dp, centred on tablets.
+- `surfaceContainerLowest` at 86% opacity over a 20σ backdrop blur, with an `outlineVariant` hairline and a soft shadow.
+
+**Placement:**
+- The bar sits directly above the iOS home indicator or Android gesture bar (`viewPadding.bottom`), or 12dp above the screen edge when there is none.
+- The shell uses `Scaffold(extendBody: true)`, so content scrolls *behind* the glass.
+
+**Selected tab:**
+- A `primary` capsule slides between tabs (`AnimatedAlign`, `AlignmentDirectional` so it follows RTL, `easeOutCubic`, **150 ms, no overshoot**). It lands together with the content cross-fade.
+- The icon (outlined to filled) and the label (weight 600, colour `onPrimary`) switch **instantly**, on the first frame, like the iOS tab bar. Contrast is AA.
+- **Responsiveness is a requirement.** On the first frame after a tap, the filled icon, the new tab and the capsule's new target are all in place; this is tested. Don't reintroduce delayed or overshooting animations here. A 300 ms `easeOutBack` capsule and an icon that scaled in from 70% made selection look late compared with the content, and users reported it as a delay.
+
+**Rules:**
+- **Labels are always visible.** Text scale clamps at 1.3× inside the bar so it never overflows.
+- **Never icon-only**, and tabs are never disabled or hidden (HIG).
+- **Semantics:** each tab is one button with its label, the hint "Tab x of 3", `selected`, and an explicit `onTap` (child semantics are excluded, so the tap action must be declared).
+- **No haptics** on tab switches; the motion skill says routine navigation shouldn't vibrate.
+- **Reduced motion:** the capsule and icon change instantly.
+- The tab *content* switch (`AnimatedBranchContainer`) is separate: a 150 ms cross-fade (see §6).
+
+**Using it in screens (required):**
+- Every scrolling screen inside the shell adds **`context.bottomBarInset`** (`MediaQuery.paddingOf(context).bottom`) to its bottom padding, so the last item scrolls clear of the bar.
+- A FAB inside a tab is wrapped in `Padding(bottom: context.bottomBarInset)`, because Scaffold positions FABs from the system safe area only.
+- Tests: `test/core/app_tab_bar_test.dart` covers:
+  - margins and the home indicator
+  - tablet width
+  - labels and semantics
+  - the sliding capsule
+  - reduced motion
+  - RTL
+  - 200% text
+  - content and the FAB staying clear of the bar
+
 ### App-level assets
 - The in-app splash is designed.
 - The native launch screens are deliberately left as Flutter defaults, as the original prompt asked. App icons are not designed yet (§10).
@@ -230,20 +269,21 @@ All text pairs meet WCAG AA. In widgets, use `context.colors`, `context.status` 
   | Change | Pattern | Where |
   | --- | --- | --- |
   | **Every screen navigation**: splash → walkthrough → welcome → home, list → detail, Add/Edit medicine, licenses, not found, and all back navigation | **Platform push**: Android `PredictiveBackPageTransitionsBuilder` (zoom plus predictive back), iOS `CupertinoPageTransitionsBuilder` (slide plus edge swipe-back) | `AppTheme.pageTransitionsTheme`, built by **`AppPageRoute`**, the router's `defaultRouteType` |
-  | Bottom-tab switch (kept separate on purpose) | **Fade-through**; every tab stays mounted, so its state is kept | `AnimatedBranchContainer` inside `AutoTabsRouter.builder` |
-  | Tab switch with reduced motion | **150 ms dissolve**, no scale | `AppMotion.pageOf` |
+  | Bottom-tab switch (kept separate on purpose) | **150 ms cross-fade**. The new tab is visible from the first frame, with no delayed phase and no scaling, the same with reduced motion. Every tab stays mounted, so its state is kept. | `AnimatedBranchContainer` inside `AutoTabsRouter.builder` |
+
+  **Tab switches must feel instant** (iOS doesn't animate them at all). A 300 ms fade-through with a scaled entry and a frame-clamped clock made the new tab half-visible only after ~144 ms (~250 ms on slow frames), and users reported it as slow. Measured now: half-visible after 32 ms and done at 144 ms at 60 fps. With 50 ms frames, it is visible on the first frame and done at 150 ms. Don't lengthen it, delay the incoming tab, scale the whole tab, or frame-clamp it.
 
   Screen routes follow the OS reduced-motion setting exactly as Add medicine does. Add medicine alone is `fullscreenDialog: true`, which on iOS makes it slide up as a modal; that is intended.
 
   **Adding a screen:** register it as a plain `AutoRoute` so it gets the default `AppPageRoute`. For an imperative push (e.g. `LicensePage`), use `Navigator.push(AppPageRoute(...))`. Never use `CustomRoute`, `MaterialPageRoute`, `PageRouteBuilder` or `showLicensePage`. `test/core/transitions_test.dart` ("every screen uses the same transition as Add medicine") checks every screen.
 
   **Slow frames must never skip a transition.** Flutter animations are time-based, and the first frame of a transition also builds the new screen. If that frame is slow (a screen's first build, which is much slower in debug builds), the next timestamp is already past the end, and the screen appears with no animation. Every screen-transition and entrance controller therefore uses **`FrameClampedTickerProvider`** (`lib/core/motion/`), which advances at most 34 ms per frame: a slow frame slows the animation briefly instead of skipping it, and timing is unchanged at normal frame rates.
-  - It is already wired into `AppPageRoute`, `AnimatedBranchContainer`, the splash intro and `TopSnackbar`.
+  - It is already wired into `AppPageRoute`, the splash intro and `TopSnackbar`. **Not** into tab switches: those must finish on time, so a slow frame completes them sooner instead of stretching them (tested in "a slow frame finishes a tab switch on time").
   - New routes must use the router's default route type (`AppPageRoute`). Never construct `MaterialPageRoute` or `PageRouteBuilder` directly.
   - New entrance animations use `AnimationController(vsync: FrameClampedTickerProvider(this), …)`.
   - Regression tests: "a slow first frame does not skip the transition" in `test/core/transitions_test.dart`.
 
-  When the OS disables animations (Android "Remove animations", or transition animation scale Off in developer options; iOS Reduce Motion), Flutter cuts every normal `AnimationController` to 5% of its length. `AnimatedBranchContainer` uses `AnimationBehavior.preserve` so the short tab dissolve still plays. Screen transitions (`AppPageRoute`) follow the OS setting.
+  When the OS disables animations (Android "Remove animations", or transition animation scale Off in developer options; iOS Reduce Motion), Flutter cuts every normal `AnimationController` to 5% of its length. `AnimatedBranchContainer` uses `AnimationBehavior.preserve` so the short tab cross-fade still plays. Screen transitions (`AppPageRoute`) follow the OS setting.
 - **Also used:**
   - a Hero on the medicine thumbnail from the inventory list to its detail (`MedicineBadge.heroTag`; only those two screens use it, so tags stay unique)
   - a cross-fade when a dose status chip changes
@@ -263,6 +303,7 @@ All text pairs meet WCAG AA. In widgets, use `context.colors`, `context.status` 
 | Need | Widget |
 | --- | --- |
 | Any top app bar | `AppToolbar` |
+| Bottom navigation | **`AppTabBar`** with `AppTabItem`s (see §5 "Bottom navigation"); add `context.bottomBarInset` to scrolling content in tabs |
 | Any button | `AppButton` (primary), `.tonal`, `.secondary`, `.text`, with options `icon`, `expand`, `loading`, `compact`, `destructive` (error-coloured; use with secondary or text) |
 | Swipe actions on a card | `Slidable` (flutter_slidable) with an `endActionPane` of **`SwipeAction`** (themed, same radius as `AppCard`). Wrap the list in `SlidableAutoCloseBehavior`, and also expose each action as a `CustomSemanticsAction` inside a `MergeSemantics` with the card. |
 | Feedback | **`TopSnackbar.show(...)`**: slides in from the top, closes with ✕ or a swipe up, or times out. Only one shows at a time and it respects reduced motion. **Never use `ScaffoldMessenger` or `SnackBar`.** |
@@ -302,8 +343,8 @@ These are UI- and language-agnostic helpers: `MediaPicker` (`media_picker.dart`)
    - Continue as guest → Today, in guest mode.
 2. **Log a dose:** Today → pick a day (±14 days) → Taken or Skip on a card. The status chip and progress update, a top snackbar appears with Undo, and the card shows its own Undo.
 3. **Add a medicine:** Inventory FAB, or the Add button in a day's empty state → form → Save. A snackbar confirms and the medicine appears in the list and on matching days.
-4. **Edit:** Inventory → card → Detail → Edit (toolbar or button) → Save. Alternatively, swipe a card right-to-left → **Edit**.
-5. **Delete:** use the Detail toolbar delete icon, the "Delete medicine" button, or swipe a card right-to-left → **Delete**. All three use `confirmAndDeleteMedicine`:
+4. **Edit:** Inventory → card → Detail → **Edit medicine** button → Save. (The detail toolbar has no actions.) Alternatively, swipe a card right-to-left → **Edit**.
+5. **Delete:** use the Detail **Delete medicine** button, or swipe a card right-to-left → **Delete**. Both use `confirmAndDeleteMedicine`:
    - A confirm dialog ("Delete Brevora?") appears first.
    - The medicine is removed from the inventory and from every day's plan.
    - The detail screen, if open, pops back to the list.
@@ -314,29 +355,29 @@ These are UI- and language-agnostic helpers: `MediaPicker` (`media_picker.dart`)
 
 ### Guest mode
 
+A guest **has no data**: no medicines and no dose logs. `MedicinesController.build` returns an empty list for guests, and only signed-in users get the sample medicines. So a guest sees only empty states:
+- Today: "No doses scheduled for this day" and "Nothing scheduled"
+- Inventory: "No medicines yet"
+
 A guest:
-- **Can:**
-  - view Today and pick dates
-  - log doses (Taken, Skip, Undo)
-  - browse Inventory and open medicine details
-  - use Profile
+- **Can** browse the screens, pick dates on Today, and use Profile.
 - **Cannot** add, edit or delete medicines, which means they also can't open the medicine form or pick photos.
 
 **How it is enforced:**
 - **One rule:** `SessionState.canManageMedicines`, also exposed as `canManageMedicinesProvider`, is false for guests.
-- **UI:** every add/edit/delete entry point calls **`runIfCanManageMedicines(context, ref, action)`**. That covers the Inventory FAB, the empty-state Add buttons (Inventory and Today), swipe Edit/Delete and their screen-reader actions, and the detail toolbar and buttons.
+- **UI:** every add/edit/delete entry point calls **`runIfCanManageMedicines(context, ref, action)`**. That covers the Inventory FAB, the empty-state Add buttons (Inventory and Today), swipe Edit/Delete and their screen-reader actions, and the detail Edit/Delete buttons.
   - Signed-in users run the action directly.
-  - Guests get **`showSignInPrompt`**, a bottom sheet with Google, Apple, "Not now" and the simulated note.
-  - Choosing a provider calls `SessionController.upgradeGuest`, which **keeps all session data**, shows a success snackbar and then continues the original action.
+  - Guests get **`showSignInRequired`**: an **alert in the same style as the logout confirmation** (`AppDialogs.confirm`), with a lock icon, "Sign in to manage medicines", "You're using the app as a guest. Sign in to add, edit or delete medicines.", and **Cancel** / **Sign in** buttons. Do not use a bottom sheet.
+  - **Sign in** calls `SessionController.requestSignIn()`, which returns to **Welcome** to pick Google or Apple. The tapped action is **not** resumed afterwards. "Continue as guest" on Welcome returns to guest mode.
+- **Data resets:** `SessionController` owns them. Every `signIn` and `logout` invalidates the medicines, logs and selected date, so each identity starts fresh: sample data for Google/Apple, empty for a guest. `MedicinesController` only `ref.read`s the session; watching it would create a circular dependency with those resets.
+  - The **Sign in** button in the Profile card calls `requestSignIn()` directly, with no alert.
 - **Router:** `SessionGuard` blocks guests from `MemberOnlyRoutes` (Add and Edit), including deep links. The guest stays where they are.
 - **New features:** any new medicine-changing action must go through `runIfCanManageMedicines`, and any new route that changes data must be added to `MemberOnlyRoutes`.
 
 **What guests see:**
 - Today greets them without a name ("Good morning").
-- Inventory shows a guest banner with **Sign in**.
-- Profile shows a person avatar, "Guest", "Browsing as a guest", a "Guest mode" chip and a **Sign in** button.
-- Logout is labelled **"Exit guest mode"**, with the same reset.
-- Guests start with the sample medicines.
+- Inventory shows its plain empty state (no guest banner, removed by user decision) and no FAB. The Add button there opens the sign-in alert.
+- Profile shows a person avatar, "Guest", "Browsing as a guest", a "Guest mode" chip and a **Sign in** button. There is **no logout row** for guests; Sign in is the way out.
 
 ### Screen states
 
@@ -345,7 +386,7 @@ A guest:
 | Today | today or another day; doses or empty ("Nothing scheduled" plus Add); past, today or future (future doses can't be logged); each dose Taken / Skipped / Upcoming / Not logged / Scheduled |
 | Progress | has doses (headline, detail, caption) or none ("No doses scheduled for this day", "–") |
 | Inventory | list (with a swipe hint), a card swiped open (Edit/Delete; only one open at a time), or empty (illustration plus Add, no FAB), including after deleting every medicine |
-| Detail | found (Edit and Delete), deleting (keeps showing the medicine while animating out), or not found (Back to inventory) |
+| Detail | found (bottom Edit medicine / Delete medicine buttons; no toolbar actions), deleting (keeps showing the medicine while animating out), or not found (Back to inventory) |
 | Form | pristine, dirty, invalid on Save (a warning snackbar with the first problem; no inline errors), picking photo (loading), photo failure (snackbar), weekly (weekday chips), monthly (day 1–28) |
 | Router | unknown link → Not found; signed out → flow stage |
 
@@ -357,10 +398,11 @@ A guest:
 - Deleting a medicine always asks first, removes it from the inventory and from every day's plan, and offers Undo, which restores its position and logs. Deleting all medicines shows "No medicines yet" and the Today empty state.
 - Logout resets medicines, logs and the selected date; signing in again shows 0 logged.
 - Guest mode:
-  - "Continue as guest" enters with sample data.
-  - Every add, edit or delete attempt shows the sign-in prompt.
-  - "Not now" changes nothing.
-  - Signing in from the prompt keeps the logs and continues the action.
+  - "Continue as guest" enters with no data: empty Today and Inventory.
+  - Every add, edit or delete attempt shows the sign-in alert.
+  - Cancel changes nothing.
+  - Sign in goes to Welcome; signing in there loads the sample data and removes the restrictions.
+  - Guest Profile has no logout row.
   - Guest deep links to Add or Edit are blocked.
 - Form validation:
   - name: required, at most 40 characters
@@ -441,6 +483,12 @@ flutter test
 | Date | Decision |
 | --- | --- |
 | 2026-11-19 | Prototype built: Riverpod, Outfit, brand blue kept and the neon accent dropped, `TopSnackbar`, `doseza_utils` with a Photo Picker–only `MediaPicker`. |
+| 2026-11-20 | **Guest banner removed (user edit):** the Inventory guest banner and its Sign in button were removed. The leftover unused variable, import and the `inventoryGuestBanner` string were cleaned up. Guests sign in via the Profile card or the sign-in alert. |
+| 2026-11-20 | **Tab selection felt delayed (user report):** the capsule went from 300 ms `easeOutBack` (overshoot, settled at 300 ms) to 150 ms `easeOutCubic`. The icon and label now switch instantly instead of a scale/fade, and each tab paints into a `RepaintBoundary` during the cross-fade (animation frames went from ~2 ms to ~1 ms on the host). Verified that frame 1 already shows the new state. Also: the Today prototype notice was removed (user edit), so the dose list and empty state now carry the bottom clearance for the floating bar. |
+| 2026-11-20 | **Faster tab switching (user report: tabs took too long):** the tab content switch went from a 300 ms fade-through (outgoing first, delayed and scaled incoming, frame-clamped) to an unclamped 150 ms cross-fade. Measured: fully visible at 144 ms (was 304 ms) at 60 fps, and 150 ms (was 450 ms) with 50 ms frames. |
+| 2026-11-20 | **New bottom navigation (user request, researched):** replaced the stock `NavigationBar` with `AppTabBar`, a floating glass pill with a sliding brand capsule, outlined-to-filled icons and always-visible labels (iOS 26 / M3 Expressive / floating-pill research). `extendBody` shell, `bottomBarInset` padding, FAB lifted above the bar, tab semantics with an explicit tap action, no navigation haptics. Removed `navigationBarTheme`. |
+| 2026-11-20 | **Guests have no data and no logout row (user request):** guests start with empty medicines and logs (empty states everywhere), and only signed-in users get the sample data. Removed the guest "Exit guest mode" row and its strings; Sign in in the profile card is the way out. Sign-in/logout resets now live in `SessionController` (fixes a circular provider dependency). The detail toolbar Edit/Delete icons were removed (user edit); the bottom buttons remain. |
+| 2026-11-20 | **Guest sign-in prompt is an alert (user request):** replaced the bottom sheet with an `AppDialogs.confirm` alert (Cancel / Sign in) like logout. Sign in goes to Welcome via `requestSignIn()` and keeps session data; the in-place `upgradeGuest` was removed. |
 | 2026-11-19 | **Light only, and guest mode (user requests):** dark theme, dark palette and Android `values-night` removed; `ThemeMode.light` pinned; iOS `UIUserInterfaceStyle = Light`. "Continue as demo" became **"Continue as guest"**, with restrictions: guests view and log doses but cannot add, edit or delete medicines (`canManageMedicines`, `runIfCanManageMedicines`, sign-in prompt with an in-place upgrade, `MemberOnlyRoutes` guard). Guest profile and greeting added. |
 | 2026-11-19 | **Delete medicine (user request):** Delete on the detail screen (toolbar and button) and a right-to-left swipe on inventory cards revealing Edit and Delete (`flutter_slidable` 5, `SwipeAction`). One shared confirm → delete → Undo flow, screen-reader custom actions, and the existing empty state once the list is empty. Added `AppButton.destructive`. |
 | 2026-11-19 | **Form errors via snackbar (user request):** no inline or red field errors. Save shows the first problem (name → times → quantity) in the top snackbar. Removed `Form`, validators, the `submitted` state and six error strings (now one `medicineFormIssue` message); `AppTextField` is a plain `TextField`. |

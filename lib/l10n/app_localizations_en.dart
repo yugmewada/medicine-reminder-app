@@ -111,7 +111,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guestLimitsNote =>
-      'As a guest you can view medicines and log doses. Sign in to add, edit or delete them.';
+      'As a guest you can explore the app without any medicines. Sign in to add and manage your own.';
 
   @override
   String get welcomeSimulatedNote =>
@@ -136,6 +136,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navProfile => 'Profile';
+
+  @override
+  String tabPositionHint(int position, int count) {
+    return 'Tab $position of $count';
+  }
 
   @override
   String greeting(String period, String name) {
@@ -731,36 +736,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInPromptMessage =>
-      'Guests can view medicines and log doses. Sign in to add, edit or delete medicines.';
-
-  @override
-  String get notNow => 'Not now';
-
-  @override
-  String signedInUpgrade(String provider) {
-    return 'Signed in with $provider (simulated). You can now manage medicines.';
-  }
-
-  @override
-  String get inventoryGuestBanner =>
-      'You\'re browsing as a guest. Sign in to add, edit or delete medicines.';
-
-  @override
-  String get exitGuestTitle => 'Exit guest mode';
-
-  @override
-  String get exitGuestSubtitle => 'Returns to the welcome screen';
-
-  @override
-  String get exitGuestConfirmTitle => 'Exit guest mode?';
-
-  @override
-  String get exitGuestConfirmMessage =>
-      'You will return to the welcome screen. Doses you logged in this session will be reset.';
-
-  @override
-  String get exitedGuestMode =>
-      'Exited guest mode. Session changes were cleared.';
+      'You\'re using the app as a guest. Sign in to add, edit or delete medicines.';
 
   @override
   String demoProfileSimulated(String provider) {

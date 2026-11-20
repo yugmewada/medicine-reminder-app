@@ -62,6 +62,9 @@ class TodayScreen extends ConsumerWidget {
     }
 
     const gutter = EdgeInsets.symmetric(horizontal: AppSpacing.page);
+    // The plan (or its empty state) ends the page, so it carries the space
+    // that keeps its last card clear of the floating tab bar.
+    final lastSectionBottom = AppSpacing.xxl + context.bottomBarInset;
 
     return Scaffold(
       body: SafeArea(
@@ -116,7 +119,8 @@ class TodayScreen extends ConsumerWidget {
             ),
             if (occasions.isEmpty)
               SliverPadding(
-                padding: gutter,
+                // Last section: clear the floating tab bar.
+                padding: gutter.copyWith(bottom: lastSectionBottom),
                 sliver: SliverToBoxAdapter(
                   child: ContentWidth(
                     child: AppCard(
@@ -141,7 +145,8 @@ class TodayScreen extends ConsumerWidget {
             else
               // Built lazily: only visible cards are laid out.
               SliverPadding(
-                padding: gutter,
+                // Last section: clear the floating tab bar.
+                padding: gutter.copyWith(bottom: lastSectionBottom),
                 sliver: SliverList.separated(
                   itemCount: occasions.length,
                   separatorBuilder: (_, _) =>
@@ -167,17 +172,18 @@ class TodayScreen extends ConsumerWidget {
                   },
                 ),
               ),
-            SliverPadding(
+            /*SliverPadding(
               padding: gutter.copyWith(
                 top: AppSpacing.xl,
-                bottom: AppSpacing.xxl,
+                // Clear the floating tab bar.
+                bottom: AppSpacing.xxl + context.bottomBarInset,
               ),
               sliver: SliverToBoxAdapter(
                 child: ContentWidth(
                   child: PrototypeNotice(message: l10n.todayNotice),
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ),

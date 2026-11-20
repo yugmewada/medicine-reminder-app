@@ -12,7 +12,6 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/medicine.dart';
 import '../../auth/presentation/sign_in_prompt.dart';
-import '../../session/session_controller.dart';
 import 'medicine_actions.dart';
 import 'medicine_l10n.dart';
 import 'medicines_controller.dart';
@@ -26,7 +25,6 @@ class InventoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final medicines = ref.watch(medicinesProvider);
-    final isGuest = !ref.watch(canManageMedicinesProvider);
     void add() => runIfCanManageMedicines(
       context,
       ref,
@@ -42,24 +40,42 @@ class InventoryScreen extends ConsumerWidget {
       ),
       floatingActionButton: medicines.isEmpty
           ? null
-          : FloatingActionButton.extended(
-              key: const ValueKey('add-medicine'),
-              onPressed: add,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.addMedicine),
+          // Scaffold places FABs from the system safe area only, so lift it
+          // above the floating tab bar explicitly.
+          : Padding(
+              padding: EdgeInsets.only(bottom: context.bottomBarInset),
+              child: FloatingActionButton.extended(
+                key: const ValueKey('add-medicine'),
+                onPressed: add,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.addMedicine),
+              ),
             ),
       body: medicines.isEmpty
           ? Center(
               child: SingleChildScrollView(
-                child: EmptyState(
-                  icon: Icons.inventory_2_rounded,
-                  title: l10n.emptyInventoryTitle,
-                  message: l10n.emptyInventoryMessage,
-                  action: AppButton(
-                    key: const ValueKey('add-medicine'),
-                    label: l10n.addMedicine,
-                    icon: const Icon(Icons.add_rounded),
-                    onPressed: add,
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.page,
+                  0,
+                  AppSpacing.page,
+                  context.bottomBarInset,
+                ),
+                child: ContentWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      EmptyState(
+                        icon: Icons.inventory_2_rounded,
+                        title: l10n.emptyInventoryTitle,
+                        message: l10n.emptyInventoryMessage,
+                        action: AppButton(
+                          key: const ValueKey('add-medicine'),
+                          label: l10n.addMedicine,
+                          icon: const Icon(Icons.add_rounded),
+                          onPressed: add,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -68,12 +84,13 @@ class InventoryScreen extends ConsumerWidget {
           // Only one card's swipe actions are open at a time.
           : SlidableAutoCloseBehavior(
               child: ListView.separated(
-                // Bottom padding keeps the FAB off the last card.
-                padding: const EdgeInsets.fromLTRB(
+                // Bottom padding keeps the FAB and the floating tab bar
+                // off the last card.
+                padding: EdgeInsets.fromLTRB(
                   AppSpacing.page,
                   AppSpacing.sm,
                   AppSpacing.page,
-                  96,
+                  96 + context.bottomBarInset,
                 ),
                 itemCount: medicines.length + 1,
                 separatorBuilder: (_, index) => SizedBox(
@@ -84,10 +101,6 @@ class InventoryScreen extends ConsumerWidget {
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (isGuest) ...[
-                              const _GuestBanner(),
-                              const SizedBox(height: AppSpacing.md),
-                            ],
                             PrototypeNotice(message: l10n.inventoryNotice),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
@@ -213,51 +226,6 @@ class _MedicineCard extends StatelessWidget {
               Icons.chevron_right_rounded,
               color: context.colors.onSurfaceVariant,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tells a guest why changes are locked, with a way to sign in.
-class _GuestBanner extends ConsumerWidget {
-  const _GuestBanner();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
-    return AppCard(
-      key: const ValueKey('guest-banner'),
-      color: colors.primaryContainer,
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          ExcludeSemantics(
-            child: Icon(
-              Icons.lock_outline_rounded,
-              color: colors.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              context.l10n.inventoryGuestBanner,
-              style: context.text.bodySmall?.copyWith(
-                color: colors.onPrimaryContainer,
-              ),
-            ),
-          ),
-          AppButton.text(
-            key: const ValueKey('guest-banner-sign-in'),
-            label: context.l10n.signIn,
-            compact: true,
-            onPressed: () => showSignInPrompt(context, ref),
           ),
         ],
       ),

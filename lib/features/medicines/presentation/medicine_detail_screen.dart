@@ -69,29 +69,14 @@ class _MedicineDetailScreenState extends ConsumerState<MedicineDetailScreen> {
         runIfCanManageMedicines(context, ref, () => _delete(medicine));
 
     return Scaffold(
-      appBar: AppToolbar(
-        title: medicine.name,
-        actions: [
-          IconButton(
-            key: const ValueKey('edit-medicine'),
-            tooltip: l10n.editMedicine,
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: edit,
-          ),
-          IconButton(
-            key: const ValueKey('delete-medicine'),
-            tooltip: l10n.deleteMedicine,
-            icon: const Icon(Icons.delete_outline_rounded),
-            onPressed: delete,
-          ),
-        ],
-      ),
+      appBar: AppToolbar(title: medicine.name),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        // Clear the floating tab bar.
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.page,
           AppSpacing.sm,
           AppSpacing.page,
-          AppSpacing.xxl,
+          AppSpacing.xxl + context.bottomBarInset,
         ),
         children: [
           ContentWidth(

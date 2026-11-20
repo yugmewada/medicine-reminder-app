@@ -247,7 +247,7 @@ abstract class AppLocalizations {
   /// Welcome-screen note explaining guest restrictions.
   ///
   /// In en, this message translates to:
-  /// **'As a guest you can view medicines and log doses. Sign in to add, edit or delete them.'**
+  /// **'As a guest you can explore the app without any medicines. Sign in to add and manage your own.'**
   String get guestLimitsNote;
 
   /// Footnote explaining sign-in is not real.
@@ -291,6 +291,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile'**
   String get navProfile;
+
+  /// Screen-reader hint on each bottom tab, e.g. Tab 1 of 3.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab {position} of {count}'**
+  String tabPositionHint(int position, int count);
 
   /// Home greeting by time of day.
   ///
@@ -1005,71 +1011,23 @@ abstract class AppLocalizations {
   /// **'Guest profile picture'**
   String get guestAvatarLabel;
 
-  /// Opens the (simulated) sign-in prompt.
+  /// Button that takes a guest to the welcome screen to sign in (simulated).
   ///
   /// In en, this message translates to:
   /// **'Sign in'**
   String get signIn;
 
-  /// Title of the sign-in prompt shown to guests.
+  /// Title of the alert shown when a guest tries to add, edit or delete a medicine.
   ///
   /// In en, this message translates to:
   /// **'Sign in to manage medicines'**
   String get signInPromptTitle;
 
-  /// Explains guest restrictions in the sign-in prompt.
+  /// Alert message shown when a guest tries a restricted action.
   ///
   /// In en, this message translates to:
-  /// **'Guests can view medicines and log doses. Sign in to add, edit or delete medicines.'**
+  /// **'You\'re using the app as a guest. Sign in to add, edit or delete medicines.'**
   String get signInPromptMessage;
-
-  /// Closes the sign-in prompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get notNow;
-
-  /// Snackbar after a guest signs in.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed in with {provider} (simulated). You can now manage medicines.'**
-  String signedInUpgrade(String provider);
-
-  /// Banner on the inventory for guests.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re browsing as a guest. Sign in to add, edit or delete medicines.'**
-  String get inventoryGuestBanner;
-
-  /// Profile row for guests (instead of Log out).
-  ///
-  /// In en, this message translates to:
-  /// **'Exit guest mode'**
-  String get exitGuestTitle;
-
-  /// Subtitle of the exit-guest row.
-  ///
-  /// In en, this message translates to:
-  /// **'Returns to the welcome screen'**
-  String get exitGuestSubtitle;
-
-  /// Confirmation title when a guest exits.
-  ///
-  /// In en, this message translates to:
-  /// **'Exit guest mode?'**
-  String get exitGuestConfirmTitle;
-
-  /// Confirmation message when a guest exits.
-  ///
-  /// In en, this message translates to:
-  /// **'You will return to the welcome screen. Doses you logged in this session will be reset.'**
-  String get exitGuestConfirmMessage;
-
-  /// Snackbar after a guest exits.
-  ///
-  /// In en, this message translates to:
-  /// **'Exited guest mode. Session changes were cleared.'**
-  String get exitedGuestMode;
 
   /// Chip when entered via simulated social sign-in.
   ///

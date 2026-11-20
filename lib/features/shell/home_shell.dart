@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/router/app_router.gr.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/navigation/app_transitions.dart';
+import '../../core/widgets/widgets.dart';
 
 /// Signed-in shell with the persistent bottom navigation bar.
 ///
@@ -38,42 +39,36 @@ class HomeShell extends StatelessWidget {
             if (!didPop) tabsRouter.setActiveIndex(0);
           },
           child: Scaffold(
+            // Content scrolls behind the floating glass tab bar; the bar's
+            // height is reported in MediaQuery padding (bottomBarInset).
+            extendBody: true,
             body: AnimatedBranchContainer(
               currentIndex: index,
               children: children,
             ),
-            bottomNavigationBar: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
+            bottomNavigationBar: AppTabBar(
+              selectedIndex: index,
+              onSelected: select,
+              items: [
+                AppTabItem(
+                  key: const ValueKey('nav-today'),
+                  icon: Icons.today_outlined,
+                  selectedIcon: Icons.today_rounded,
+                  label: l10n.navToday,
                 ),
-              ),
-              child: NavigationBar(
-                selectedIndex: index,
-                onDestinationSelected: select,
-                destinations: [
-                  NavigationDestination(
-                    key: const ValueKey('nav-today'),
-                    icon: const Icon(Icons.today_outlined),
-                    selectedIcon: const Icon(Icons.today_rounded),
-                    label: l10n.navToday,
-                  ),
-                  NavigationDestination(
-                    key: const ValueKey('nav-inventory'),
-                    icon: const Icon(Icons.inventory_2_outlined),
-                    selectedIcon: const Icon(Icons.inventory_2_rounded),
-                    label: l10n.navInventory,
-                  ),
-                  NavigationDestination(
-                    key: const ValueKey('nav-profile'),
-                    icon: const Icon(Icons.person_outline_rounded),
-                    selectedIcon: const Icon(Icons.person_rounded),
-                    label: l10n.navProfile,
-                  ),
-                ],
-              ),
+                AppTabItem(
+                  key: const ValueKey('nav-inventory'),
+                  icon: Icons.inventory_2_outlined,
+                  selectedIcon: Icons.inventory_2_rounded,
+                  label: l10n.navInventory,
+                ),
+                AppTabItem(
+                  key: const ValueKey('nav-profile'),
+                  icon: Icons.person_outline_rounded,
+                  selectedIcon: Icons.person_rounded,
+                  label: l10n.navProfile,
+                ),
+              ],
             ),
           ),
         );

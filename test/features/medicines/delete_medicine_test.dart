@@ -51,12 +51,18 @@ void main() {
     await openInventory(tester);
     await tapAndSettle(tester, card('sample-brevora'));
 
-    await tapAndSettle(tester, find.byKey(const ValueKey('delete-medicine')));
+    await tapAndSettle(
+      tester,
+      find.byKey(const ValueKey('delete-medicine-button')),
+    );
     expect(find.text('Delete Brevora?'), findsOneWidget);
     await tapAndSettle(tester, find.text('Cancel'));
     expect(find.byType(MedicineDetailScreen), findsOneWidget);
 
-    await tapAndSettle(tester, find.byKey(const ValueKey('delete-medicine')));
+    await tapAndSettle(
+      tester,
+      find.byKey(const ValueKey('delete-medicine-button')),
+    );
     await tester.tap(confirmDelete);
     // While the detail animates out it keeps showing the medicine.
     for (var i = 0; i < 10; i++) {

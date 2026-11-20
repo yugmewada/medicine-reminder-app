@@ -81,7 +81,8 @@ void main() {
 
     TopSnackbar.dismiss();
     await tester.pumpAndSettle();
-    await tapAndSettle(tester, find.byKey(const ValueKey('continue-guest')));
+    await tapAndSettle(tester, find.byKey(const ValueKey('social-google')));
+    await tapAndSettle(tester, find.text('Continue to demo'));
     expect(find.textContaining('0 of 4'), findsOneWidget);
   });
 

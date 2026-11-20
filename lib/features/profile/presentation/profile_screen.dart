@@ -8,7 +8,6 @@ import '../../../core/navigation/app_transitions.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../auth/presentation/sign_in_prompt.dart';
 import '../../session/session_controller.dart';
 
 @RoutePage()
@@ -25,25 +24,19 @@ class ProfileScreen extends ConsumerWidget {
       AppInfo.buildNumber,
     );
 
-    // Guests "exit guest mode"; signed-in users "log out". Same reset.
-    final logoutTitle = isGuest ? l10n.exitGuestTitle : l10n.logoutTitle;
+    // Signed-in users only; guests leave via Sign in in the profile card.
     Future<void> logout() async {
       final confirmed = await AppDialogs.confirm(
         context,
-        title: isGuest ? l10n.exitGuestConfirmTitle : l10n.logoutConfirmTitle,
-        message: isGuest
-            ? l10n.exitGuestConfirmMessage
-            : l10n.logoutConfirmMessage,
-        confirmLabel: logoutTitle,
+        title: l10n.logoutConfirmTitle,
+        message: l10n.logoutConfirmMessage,
+        confirmLabel: l10n.logoutTitle,
         icon: Icons.logout_rounded,
         destructive: true,
       );
       if (!confirmed || !context.mounted) return;
       // Shown first: the router replaces this screen once the session resets.
-      TopSnackbar.show(
-        context,
-        message: isGuest ? l10n.exitedGuestMode : l10n.loggedOut,
-      );
+      TopSnackbar.show(context, message: l10n.loggedOut);
       ref.read(sessionProvider.notifier).logout();
     }
 
@@ -55,11 +48,12 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppToolbar(title: l10n.profileTitle),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(
+        // Clear the floating tab bar.
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.page,
           AppSpacing.sm,
           AppSpacing.page,
-          AppSpacing.xxl,
+          AppSpacing.xxl + context.bottomBarInset,
         ),
         children: [
           ContentWidth(
@@ -128,21 +122,23 @@ class ProfileScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                AppCard(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                  child: ActionRow(
-                    key: const ValueKey('row-logout'),
-                    icon: Icons.logout_rounded,
-                    title: logoutTitle,
-                    subtitle: isGuest
-                        ? l10n.exitGuestSubtitle
-                        : l10n.logoutSubtitle,
-                    destructive: true,
-                    showChevron: false,
-                    onTap: logout,
+                if (!isGuest) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  AppCard(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: ActionRow(
+                      key: const ValueKey('row-logout'),
+                      icon: Icons.logout_rounded,
+                      title: l10n.logoutTitle,
+                      subtitle: l10n.logoutSubtitle,
+                      destructive: true,
+                      showChevron: false,
+                      onTap: logout,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   l10n.versionLine(l10n.appTitle, version),
@@ -224,7 +220,7 @@ class _ProfileHeader extends ConsumerWidget {
               label: l10n.signIn,
               icon: const Icon(Icons.login_rounded),
               expand: true,
-              onPressed: () => showSignInPrompt(context, ref),
+              onPressed: ref.read(sessionProvider.notifier).requestSignIn,
             ),
           ],
         ],
